@@ -1,0 +1,2 @@
+rootProject.name='cubiqua'
+include ':app'
