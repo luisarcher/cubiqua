@@ -5,8 +5,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.view.View;
@@ -17,6 +20,7 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 
+import java.util.List;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
@@ -24,23 +28,38 @@ public class MainActivity extends AppCompatActivity {
     private int locationRequestCode = 1000;
     private FusedLocationProviderClient mFusedLocationClient;
 
+    // XML Elements
     private TextView txtLocation;
+    private TextView txtDeviceList;
+
     private double wayLatitude = 0.0, wayLongitude = 0.0;
+
+    private SensorManager sensorManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Find elements from xml view
         this.txtLocation = (TextView) findViewById(R.id.txtLocation);
+        this.txtDeviceList = (TextView) findViewById(R.id.txtDeviceList);
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        checkPermissions();
+        this.checkPermissions();
+        this.getSensorList();
+    }
+
+    private void getSensorList(){
+        List<Sensor> deviceSensors = sensorManager.getSensorList(Sensor.TYPE_ALL);
+        txtDeviceList.setText(deviceSensors.toString());
     }
 
     private void checkPermissions(){
@@ -96,7 +115,5 @@ public class MainActivity extends AppCompatActivity {
         if (sendIntent.resolveActivity(getPackageManager()) != null) {
             startActivity(sendIntent);
         }
-
-
     }
 }
