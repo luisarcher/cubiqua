@@ -50,6 +50,12 @@
         android:text="@string/acc_pholder"
         android:textSize="14sp" />
 
+    <Button
+        android:id="@+id/btnUpload"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Upload"/>
+
     <!-- ACCELEROMETER ENDS-->
 
     <TextView
@@ -58,5 +64,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="device_list_placeholder" />
+
+
+
+
 
 </LinearLayout>
