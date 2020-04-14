@@ -6,6 +6,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SensorRecorder {
@@ -16,51 +17,79 @@ public class SensorRecorder {
     private Sensor sensorAccelerometer;
     private Sensor sensorGyroscope;
 
-    private List<SensorStamp> entries;
+    private static List<SensorStamp> entries;
 
-    public SensorRecorder(Context c) {
-        this.context = c;
-        sensorManager = (SensorManager) this.context.getSystemService(Context.SENSOR_SERVICE);
+    public SensorRecorder(Context context) {
+        this.context = context;
+        this.sensorManager = (SensorManager) this.context.getSystemService(Context.SENSOR_SERVICE);
+
+        entries = new ArrayList<>();
     }
 
     public void startRecording() {
-        sensorManager.registerListener(this.accelerometerListener, sensorAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-        sensorManager.registerListener(this.gyroscopeListener, sensorGyroscope, SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(accelerometerListener, sensorAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(gyroscopeListener, sensorGyroscope, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     public void stopRecording() {
-        sensorManager.unregisterListener(this.accelerometerListener);
-        sensorManager.unregisterListener(this.gyroscopeListener);
+        sensorManager.unregisterListener(accelerometerListener);
+        sensorManager.unregisterListener(gyroscopeListener);
+    }
+
+    public List<SensorStamp> getEntries() {
+        return entries;
     }
 
     // === Listeners === //
+
     // Accelerometer Listener
-    public SensorEventListener accelerometerListener = new SensorEventListener() {
+    // Accelerometer
+    private static float last_x_acc;
+    private static float last_y_acc;
+    private static float last_z_acc;
+    private static SensorEventListener accelerometerListener = new SensorEventListener() {
         public void onAccuracyChanged(Sensor sensor, int acc) {
         }
         public void onSensorChanged(SensorEvent event) {
             float[] acceleration = accelerometerFilter(event);
+            last_x_acc = acceleration[0];
+            last_y_acc = acceleration[1];
+            last_z_acc = acceleration[2];
+
+            saveNewSensorEntry();
         }
     };
 
     // Gyroscope Listener
-
-    public SensorEventListener gyroscopeListener = new SensorEventListener() {
+    // Gyro
+    private float last_x_gyro;
+    private float last_y_gyro;
+    private float last_z_gyro;
+    private SensorEventListener gyroscopeListener = new SensorEventListener() {
         public void onAccuracyChanged(Sensor sensor, int acc) {
         }
         public void onSensorChanged(SensorEvent event) {
-            float x = event.values[0];
-            float y = event.values[1];
-            float z = event.values[2];
+            last_x_gyro = event.values[0];
+            last_y_gyro = event.values[1];
+            last_z_gyro = event.values[2];
             //textX.setText("X : " + (int) x + " rad/s");
             //textY.setText("Y : " + (int) y + " rad/s");
             //textZ.setText("Z : " + (int) z + " rad/s");
+
+            saveNewSensorEntry();
         }
     };
 
+    // === Listeners ENDS === //
+
+    private static void saveNewSensorEntry() {
+        SensorStamp stamp = new SensorStamp();
+        entries.add(stamp);
+    }
+
     // === Helpers === //
 
-    private float[] accelerometerFilter(SensorEvent event) {
+    private static float[] accelerometerFilter(SensorEvent event) {
         final float alpha = (float)0.8;
         float[] gravity = new float[3];
         float[] linear_acceleration = new float[3];
@@ -76,5 +105,12 @@ public class SensorRecorder {
 
         return linear_acceleration;
     }
+
+    // === Debug === //
+    public String getAccAsStr() {
+        return "Accelerometer data: " + last_x_acc + " " + last_y_acc + " " + last_z_acc;
+    }
+
+    // === Debug ENDS === //
 
 }

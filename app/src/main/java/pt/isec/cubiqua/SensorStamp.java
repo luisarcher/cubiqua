@@ -13,14 +13,14 @@ public class SensorStamp {
     private double altitude;
 
     // Accelerometer
-    private float acc_raw_x;
-    private float acc_raw_y;
-    private float acc_raw_z;
+    private float x_acc;
+    private float y_acc;
+    private float z_acc;
 
     // Gyro
-    private float gyro_raw_x;
-    private float gyro_raw_y;
-    private float gyro_raw_z;
+    private float x_gyro;
+    private float y_gyro;
+    private float z_gyro;
 
     // Other Sensor
     private int other;

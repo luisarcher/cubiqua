@@ -64,6 +64,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private String _fileData;
 
+    private SensorRecorder sensorRecorder;
+
+    private List<SensorStamp> sensorStampEntries;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -82,11 +86,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             Toast.makeText(getApplicationContext(), "No accelerometer!", Toast.LENGTH_LONG).show();
         }
 
-        getSensorList();
+        //getSensorList();
+
         //this._fileData = readFromFile(getApplicationContext());
         //this.txtDeviceList.setText(this._fileData);
         //uploadToServer();
-        isStoragePermissionGranted();
+
+        //isStoragePermissionGranted();
 
         Button button = (Button) findViewById(R.id.btnUpload);
         button.setOnClickListener(new View.OnClickListener() {
@@ -94,6 +100,19 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 uploadFile();
             }
         });
+
+        /* Tests*/
+        this.sensorRecorder = new SensorRecorder(this);
+        //this.sensorRecorder.startRecording();
+
+        while(this.sensorRecorder.getEntries().size() < 10 );
+
+        //this.sensorRecorder.stopRecording();
+
+        // Caution, this is a reference and not a list copy!
+        this.sensorStampEntries = this.sensorRecorder.getEntries();
+
+        this.txtAccelerometer.setText(this.sensorRecorder.getAccAsStr());
 
     }
 
@@ -115,7 +134,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         linear_acceleration[1] = event.values[1] - gravity[1];
         linear_acceleration[2] = event.values[2] - gravity[2];
 
-        txtAccelerometer.setText("X: " + linear_acceleration[0] + "\nY: "+linear_acceleration[1]+"\nZ: "+linear_acceleration[2]);
+        //txtAccelerometer.setText("X: " + linear_acceleration[0] + "\nY: "+linear_acceleration[1]+"\nZ: "+linear_acceleration[2]);
     }
 
     @Override
@@ -128,12 +147,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         super.onResume();
 
         // Location permissions
-        this.checkPermissions();
+        /*this.checkPermissions();
 
         this.getSensorList();
 
         // Accelerometer
-        mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);*/
     }
 
     private void getSensorList(){
@@ -156,7 +175,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     protected void onPause() {
         super.onPause();
-        mSensorManager.unregisterListener(this);
+        //mSensorManager.unregisterListener(this);
     }
 
     @Override
