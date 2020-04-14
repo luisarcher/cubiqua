@@ -1,10 +1,16 @@
 package pt.isec.cubiqua;
 
+import android.app.Activity;
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.location.Location;
+
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,15 +20,23 @@ public class SensorRecorder {
     private Context context;
     private IView viewActivity;
 
+    private FusedLocationProviderClient fusedLocationClient;
+
     private SensorManager sensorManager;
     private Sensor sensorAccelerometer;
     private Sensor sensorGyroscope;
 
-    private static List<SensorStamp> entries;
+    private List<SensorStamp> entries;
+
+    private boolean accelerometerAvailable;
+    private boolean gyroscopeAvailable;
 
     public SensorRecorder(Context context, IView v) {
         this.context = context;
         this.viewActivity = v;
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
+
         this.sensorManager = (SensorManager) this.context.getSystemService(Context.SENSOR_SERVICE);
 
         sensorAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -45,13 +59,26 @@ public class SensorRecorder {
         return entries;
     }
 
+    private void saveNewSensorEntry() {
+        this.updateCurrentLocation();
+
+        SensorStamp stamp = new SensorStamp("test_activity");
+        stamp.setLocationData(this.lastLatitude, this.lastLongitude, 0.0, false);
+        stamp.setAccData(this.last_x_acc, this.last_y_acc, this.last_z_acc);
+        stamp.setGyroData(this.last_x_gyro, this.last_y_gyro, this.last_z_gyro);
+
+        entries.add(stamp);
+
+        this.viewActivity.update();
+    }
+
     // === Listeners === //
 
     // Accelerometer Listener
     // Accelerometer
-    private static float last_x_acc;
-    private static float last_y_acc;
-    private static float last_z_acc;
+    private float last_x_acc;
+    private float last_y_acc;
+    private float last_z_acc;
     private SensorEventListener accelerometerListener = new SensorEventListener() {
         public void onAccuracyChanged(Sensor sensor, int acc) {
         }
@@ -85,13 +112,33 @@ public class SensorRecorder {
         }
     };
 
+    private double lastLatitude = 0.0, lastLongitude = 0.0;
+    private void updateCurrentLocation() {
+        fusedLocationClient.getLastLocation().addOnSuccessListener((Activity) context, new OnSuccessListener<Location>() {
+            @Override
+            public void onSuccess(Location location) {
+                if (location != null) {
+                    lastLatitude = location.getLatitude();
+                    lastLongitude = location.getLongitude();
+                    //txtLocation.setText(String.format(Locale.US, "%s -- %s", wayLatitude, wayLongitude));
+                }
+            }
+        });
+    }
+
     // === Listeners ENDS === //
 
-    private void saveNewSensorEntry() {
-        SensorStamp stamp = new SensorStamp();
-        entries.add(stamp);
+    private void checkSensorAvailability() {
+        this.accelerometerAvailable = (sensorAccelerometer != null);
+        this.gyroscopeAvailable = (sensorGyroscope != null);
+    }
 
-        this.viewActivity.update();
+    public boolean isAccelerometerAvailable() {
+        return accelerometerAvailable;
+    }
+
+    public boolean isGyroscopeAvailable() {
+        return gyroscopeAvailable;
     }
 
     // === Helpers === //

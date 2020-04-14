@@ -2,15 +2,15 @@ package pt.isec.cubiqua;
 
 public class SensorStamp {
 
-    /* session_id lat lngalt timestamp x_acc y_acc z_acc x_gyro y_gyroz_gyro other_sensor... activity */
+    /* session_id lat lng alt timestamp x_acc y_acc z_acc x_gyro y_gyro z_gyro other_sensor... activity */
     private static int sessionId = 1;
-    private long timestamp;
+    private long unixTime;
 
     // Location
     private double latitude;
     private double longitude;
-    private boolean indoor;
     private double altitude;
+    private boolean indoor;
 
     // Accelerometer
     private float x_acc;
@@ -28,16 +28,48 @@ public class SensorStamp {
     // Activity TAG
     private String tag;
 
-    public SensorStamp() {
-        ++sessionId;
-    }
-
-    public SensorStamp(long timestamp, String activity) {
-        this.timestamp = timestamp;
+    public SensorStamp(String activity) {
+        this.unixTime = System.currentTimeMillis() / 1000L;
         this.tag = activity;
         ++sessionId;
     }
 
+    public void setLocationData(double lat, double lon, double alt, boolean indoor) {
+        this.latitude = lat;
+        this.longitude = lon;
+        this.altitude = alt;
+        this.indoor = indoor;
+    }
+
+    public void setAccData(float x, float y, float z) {
+        this.x_acc = x;
+        this.y_acc = y;
+        this.z_acc = z;
+    }
+
+    public void setGyroData(float x, float y, float z) {
+        this.x_gyro = x;
+        this.y_gyro = y;
+        this.z_gyro = z;
+    }
+
     /*falta o toString*/
+    @Override
+    public String toString(){
+        return "" + sessionId + ","
+                + latitude + ","
+                + longitude + ","
+                + altitude + ","
+                + unixTime + ","
+                + x_acc + ","
+                + y_acc + ","
+                + z_acc + ","
+                + x_gyro + ","
+                + y_gyro + ","
+                + z_gyro + ","
+                + other + ","
+                + tag + ",";
+
+    }
 
 }

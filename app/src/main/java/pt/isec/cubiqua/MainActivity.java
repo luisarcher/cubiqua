@@ -5,11 +5,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
-import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -25,9 +20,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
@@ -36,37 +28,30 @@ import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.util.List;
-import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity implements SensorEventListener, IView {
-
-    private int locationRequestCode = 1000;
-    private FusedLocationProviderClient mFusedLocationClient;
+public class MainActivity extends AppCompatActivity implements IView {
 
     // XML Elements
     private TextView txtLocation;
     private TextView txtAccelerometer;
+    private TextView txtGyroscope;
+    private TextView txtNEntries;
     private TextView txtDeviceList;
 
-    private double wayLatitude = 0.0, wayLongitude = 0.0;
-
-    private SensorManager mSensorManager;
-    private Sensor mAccelerometer;
+    private Button uploadButton;
+    private Button startButton;
+    private Button stopButton;
 
     private String _fileData;
 
-    private SensorRecorder sensorRecorder;
+    private int locationRequestCode = 1000;
 
-    private List<SensorStamp> sensorStampEntries;
+    private SensorRecorder sensorRecorder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,16 +60,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         // Find elements from xml view
         this.txtLocation = (TextView) findViewById(R.id.txtLocation);
-        this.txtDeviceList = (TextView) findViewById(R.id.txtDeviceList);
         this.txtAccelerometer = (TextView) findViewById(R.id.txtAccelerometer);
+        this.txtGyroscope = (TextView) findViewById(R.id.txtGyroscope);
+        this.txtNEntries = (TextView) findViewById(R.id.txtNEntries);
+        this.txtDeviceList = (TextView) findViewById(R.id.txtDeviceList);
 
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        this.sensorRecorder = new SensorRecorder(this, this);
+        this.checkSensorAvailability();
 
-        mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        if (mAccelerometer == null){
-            Toast.makeText(getApplicationContext(), "No accelerometer!", Toast.LENGTH_LONG).show();
-        }
+        // check permissions
 
         //getSensorList();
 
@@ -94,58 +78,58 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         //isStoragePermissionGranted();
 
-        Button button = (Button) findViewById(R.id.btnUpload);
-        button.setOnClickListener(new View.OnClickListener() {
+
+        startButton = (Button) findViewById(R.id.btnStart);
+        startButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                uploadFile();
+                sensorRecorder.startRecording();
             }
         });
 
-        /* Tests*/
-        this.sensorRecorder = new SensorRecorder(this, this);
-        this.sensorRecorder.startRecording();
+        stopButton = (Button) findViewById(R.id.btnStop);
+        stopButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                sensorRecorder.stopRecording();
+            }
+        });
+
+        uploadButton = (Button) findViewById(R.id.btnUpload);
+        uploadButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                //uploadFile();
+            }
+        });
 
         //while(this.sensorRecorder.getEntries().size() < 10 );
-
-        //this.sensorRecorder.stopRecording();
 
         // Caution, this is a reference and not a list copy!
         //this.sensorStampEntries = this.sensorRecorder.getEntries();
 
         //this.txtAccelerometer.setText(this.sensorRecorder.getAccAsStr());
+    }
 
+    public void checkSensorAvailability() {
+        if (!this.sensorRecorder.isAccelerometerAvailable()) {
+            Toast.makeText(getApplicationContext(), "No Accelerometer!", Toast.LENGTH_LONG).show();
+        }
+        if (!this.sensorRecorder.isGyroscopeAvailable()) {
+            Toast.makeText(getApplicationContext(), "No Gyroscope!", Toast.LENGTH_LONG).show();
+        }
     }
 
     public void update() {
-
         this.txtAccelerometer.setText(this.sensorRecorder.getAccAsStr());
 
-    }
+        String n_entries = "" + this.sensorRecorder.getEntries().size();
 
-    public void onSensorChanged(SensorEvent event){
-        // In this example, alpha is calculated as t / (t + dT),
-        // where t is the low-pass filter's time-constant and
-        // dT is the event delivery rate.
+        this.txtNEntries.setText(n_entries);
+        StringBuilder _out = new StringBuilder();
 
-        final float alpha = (float)0.8;
-        float[] gravity = new float[3];
-        float[] linear_acceleration = new float[3];
-        // Isolate the force of gravity with the low-pass filter.
-        gravity[0] = alpha * gravity[0] + (1 - alpha) * event.values[0];
-        gravity[1] = alpha * gravity[1] + (1 - alpha) * event.values[1];
-        gravity[2] = alpha * gravity[2] + (1 - alpha) * event.values[2];
+        for (SensorStamp stamp : this.sensorRecorder.getEntries()) {
+            _out.append(stamp.toString()).append("\n");
+        }
 
-        // Remove the gravity contribution with the high-pass filter.
-        linear_acceleration[0] = event.values[0] - gravity[0];
-        linear_acceleration[1] = event.values[1] - gravity[1];
-        linear_acceleration[2] = event.values[2] - gravity[2];
-
-        //txtAccelerometer.setText("X: " + linear_acceleration[0] + "\nY: "+linear_acceleration[1]+"\nZ: "+linear_acceleration[2]);
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
+        this.txtDeviceList.setText(_out.toString());
     }
 
     @Override
@@ -153,66 +137,20 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         super.onResume();
 
         // Location permissions
-        /*this.checkPermissions();
+        /*this.checkPermissions();*/
 
         this.getSensorList();
-
-        // Accelerometer
-        mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);*/
     }
 
     private void getSensorList(){
-        List<Sensor> deviceSensors = mSensorManager.getSensorList(Sensor.TYPE_ALL);
+        //List<Sensor> deviceSensors = mSensorManager.getSensorList(Sensor.TYPE_ALL);
         // txtDeviceList.setText(deviceSensors.toString());
         //writeToFile(deviceSensors.toString(), getApplicationContext());
-    }
-
-    private void checkPermissions(){
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // Request access to Location
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
-                    locationRequestCode);
-        } else {
-            this.updateCurrentLocation();
-        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        //mSensorManager.unregisterListener(this);
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        switch (requestCode) {
-            case 1000: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    this.updateCurrentLocation();
-
-                } else {
-                    Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show();
-                }
-                break;
-            }
-        }
-    }
-
-    private void updateCurrentLocation(){
-        mFusedLocationClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
-            @Override
-            public void onSuccess(Location location) {
-                if (location != null) {
-                    wayLatitude = location.getLatitude();
-                    wayLongitude = location.getLongitude();
-                    txtLocation.setText(String.format(Locale.US, "%s -- %s", wayLatitude, wayLongitude));
-                }
-            }
-        });
     }
 
     public void doSomething(View view){
@@ -276,52 +214,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         return true;
     }
 
-    public void saveFile(){
-        boolean mExternalStorageAvailable = false;
-        boolean mExternalStorageWriteable = false;
-        String state = Environment.getExternalStorageState();
-
-        if (Environment.MEDIA_MOUNTED.equals(state)) {
-            // We can read and write the media
-            mExternalStorageAvailable = mExternalStorageWriteable = true;
-        } else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
-            // We can only read the media
-            mExternalStorageAvailable = true;
-            mExternalStorageWriteable = false;
-        } else {
-            // Something else is wrong. It may be one of many other states, but all we need
-            //  to know is we can neither read nor write
-            mExternalStorageAvailable = mExternalStorageWriteable = false;
-        }
-        if( mExternalStorageAvailable && mExternalStorageWriteable ){
-            String message = "this a test message with data";
-            File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), "sensor_data.txt");
-            BufferedWriter bw;
-            try {
-                bw = new BufferedWriter(new FileWriter(file, true));
-                bw.write(message);
-                bw.newLine();
-                bw.close();
-                bw.flush();
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-            //Nao esquecer:  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-        }
-
-    }
-
-    public void uploadFile() {
-        new LongOperation(this).execute();
-    }
-
-    public  boolean isStoragePermissionGranted() {
+    /* == Check permissions == */
+    // Storage permissions
+    public boolean isStoragePermissionGranted() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
                     == PackageManager.PERMISSION_GRANTED) {
                 Log.d(" ", "Permission is granted");
-                this.saveFile();
+                //this.saveFile();
                 return true;
             } else {
 
@@ -334,6 +234,42 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             Log.v("","Permission is granted");
             return true;
         }
+    }
+
+    // Location permission
+
+    private void checkPermissions(){
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // Request access to Location
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
+                    locationRequestCode);
+        } else {
+            //this.updateCurrentLocation();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case 1000: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    //this.updateCurrentLocation();
+
+                } else {
+                    Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show();
+                    //this.finishAffinity();
+                }
+                break;
+            }
+        }
+    }
+
+    public void uploadFile() {
+        new LongOperation(this).execute();
     }
 
     private static class LongOperation extends AsyncTask<Void, Integer, String> {
@@ -393,50 +329,5 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             progress.dismiss();
         }
 
-    }
-
-    /* MY CUSTOM METHODS */
-    private void my_uploadToServer(){
-        try {
-            JSch ssh = new JSch();
-            Session session = ssh.getSession("cubistudent", "urbysense.dei.uc.pt", 22);
-            // Remember that this is just for testing and we need a quick access, you can add an identity and known_hosts file to prevent
-            // Man In the Middle attacks
-            java.util.Properties config = new java.util.Properties();
-            config.put("StrictHostKeyChecking", "no");
-            session.setConfig(config);
-            session.setPassword("miscubi2020");
-
-            session.connect();
-            Channel channel = session.openChannel("sftp");
-            channel.connect();
-
-            ChannelSftp sftp = (ChannelSftp) channel;
-
-            /*String directory = "a21201026";
-            sftp.cd(directory);*/
-            // If you need to display the progress of the upload, read how to do it in the end of the article
-
-            // use the put method , if you are using android remember to remove "file://" and use only the relative path
-            sftp.put("/storage/0/sensor_data.txt", "/home/cubistudent/data/a21201026/sensor_list.txt");
-
-            Boolean success = true;
-
-            if(success){
-                // The file has been uploaded succesfully
-                Toast.makeText(this,"Uploaded to server!", Toast.LENGTH_LONG).show();
-            } else {
-                Toast.makeText(this,"Upload failed!", Toast.LENGTH_LONG).show();
-            }
-
-            channel.disconnect();
-            session.disconnect();
-        } catch (JSchException e) {
-            System.out.println(e.getMessage().toString());
-            e.printStackTrace();
-        } catch (SftpException e) {
-            System.out.println(e.getMessage().toString());
-            e.printStackTrace();
-        }
     }
 }
