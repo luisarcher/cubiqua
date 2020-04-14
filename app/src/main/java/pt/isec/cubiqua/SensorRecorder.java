@@ -12,6 +12,7 @@ import java.util.List;
 public class SensorRecorder {
 
     private Context context;
+    private IView viewActivity;
 
     private SensorManager sensorManager;
     private Sensor sensorAccelerometer;
@@ -19,9 +20,13 @@ public class SensorRecorder {
 
     private static List<SensorStamp> entries;
 
-    public SensorRecorder(Context context) {
+    public SensorRecorder(Context context, IView v) {
         this.context = context;
+        this.viewActivity = v;
         this.sensorManager = (SensorManager) this.context.getSystemService(Context.SENSOR_SERVICE);
+
+        sensorAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        sensorGyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
 
         entries = new ArrayList<>();
     }
@@ -47,7 +52,7 @@ public class SensorRecorder {
     private static float last_x_acc;
     private static float last_y_acc;
     private static float last_z_acc;
-    private static SensorEventListener accelerometerListener = new SensorEventListener() {
+    private SensorEventListener accelerometerListener = new SensorEventListener() {
         public void onAccuracyChanged(Sensor sensor, int acc) {
         }
         public void onSensorChanged(SensorEvent event) {
@@ -82,14 +87,16 @@ public class SensorRecorder {
 
     // === Listeners ENDS === //
 
-    private static void saveNewSensorEntry() {
+    private void saveNewSensorEntry() {
         SensorStamp stamp = new SensorStamp();
         entries.add(stamp);
+
+        this.viewActivity.update();
     }
 
     // === Helpers === //
 
-    private static float[] accelerometerFilter(SensorEvent event) {
+    private float[] accelerometerFilter(SensorEvent event) {
         final float alpha = (float)0.8;
         float[] gravity = new float[3];
         float[] linear_acceleration = new float[3];

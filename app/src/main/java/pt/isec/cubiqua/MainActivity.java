@@ -47,7 +47,7 @@ import java.io.OutputStreamWriter;
 import java.util.List;
 import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity implements SensorEventListener {
+public class MainActivity extends AppCompatActivity implements SensorEventListener, IView {
 
     private int locationRequestCode = 1000;
     private FusedLocationProviderClient mFusedLocationClient;
@@ -102,15 +102,21 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         });
 
         /* Tests*/
-        this.sensorRecorder = new SensorRecorder(this);
-        //this.sensorRecorder.startRecording();
+        this.sensorRecorder = new SensorRecorder(this, this);
+        this.sensorRecorder.startRecording();
 
-        while(this.sensorRecorder.getEntries().size() < 10 );
+        //while(this.sensorRecorder.getEntries().size() < 10 );
 
         //this.sensorRecorder.stopRecording();
 
         // Caution, this is a reference and not a list copy!
-        this.sensorStampEntries = this.sensorRecorder.getEntries();
+        //this.sensorStampEntries = this.sensorRecorder.getEntries();
+
+        //this.txtAccelerometer.setText(this.sensorRecorder.getAccAsStr());
+
+    }
+
+    public void update() {
 
         this.txtAccelerometer.setText(this.sensorRecorder.getAccAsStr());
 
