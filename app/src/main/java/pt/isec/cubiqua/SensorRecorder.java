@@ -35,14 +35,15 @@ public class SensorRecorder {
         this.context = context;
         this.viewActivity = v;
 
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
+        this.fusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
 
         this.sensorManager = (SensorManager) this.context.getSystemService(Context.SENSOR_SERVICE);
 
-        sensorAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        sensorGyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+        this.sensorAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        this.sensorGyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
 
-        entries = new ArrayList<>();
+        this.checkSensorAvailability();
+        this.entries = new ArrayList<>();
     }
 
     public void startRecording() {
@@ -104,15 +105,14 @@ public class SensorRecorder {
             last_x_gyro = event.values[0];
             last_y_gyro = event.values[1];
             last_z_gyro = event.values[2];
-            //textX.setText("X : " + (int) x + " rad/s");
-            //textY.setText("Y : " + (int) y + " rad/s");
-            //textZ.setText("Z : " + (int) z + " rad/s");
 
             saveNewSensorEntry();
         }
     };
 
-    private double lastLatitude = 0.0, lastLongitude = 0.0;
+    private double lastLatitude = 0.0;
+    private double lastLongitude = 0.0;
+    private double lastAltitude = 0.0;
     private void updateCurrentLocation() {
         fusedLocationClient.getLastLocation().addOnSuccessListener((Activity) context, new OnSuccessListener<Location>() {
             @Override
@@ -120,6 +120,7 @@ public class SensorRecorder {
                 if (location != null) {
                     lastLatitude = location.getLatitude();
                     lastLongitude = location.getLongitude();
+                    lastAltitude = location.getAltitude();
                     //txtLocation.setText(String.format(Locale.US, "%s -- %s", wayLatitude, wayLongitude));
                 }
             }
@@ -160,11 +161,22 @@ public class SensorRecorder {
         return linear_acceleration;
     }
 
-    // === Debug === //
+
     public String getAccAsStr() {
-        return "Accelerometer data: " + last_x_acc + " " + last_y_acc + " " + last_z_acc;
+        return " X: " + last_x_acc +
+                " \nY: " + last_y_acc +
+                " \nZ: " + last_z_acc;
     }
 
-    // === Debug ENDS === //
+    public String getGyroAsStr(){
+        return "X : " + (int) last_x_gyro + " rad/s" +
+        "\nY : " + (int) last_y_gyro + " rad/s" +
+        "\nZ : " + (int) last_z_gyro + " rad/s";
+    }
 
+    public String getLocAsStr(){
+        return " Lat: " + lastLatitude +
+                " \nLon: " + lastLongitude +
+                " \nAlt: " + lastAltitude;
+    }
 }

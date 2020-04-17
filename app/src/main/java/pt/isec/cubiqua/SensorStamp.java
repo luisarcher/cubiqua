@@ -68,7 +68,7 @@ public class SensorStamp {
                 + y_gyro + ","
                 + z_gyro + ","
                 + other + ","
-                + tag + ",";
+                + tag;
 
     }
 

@@ -21,12 +21,16 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Date;
 
 public class FileManager {
 
     /*  TODO save to local storage*/
     /* TODO send to remote server */
     private Context context;
+
+    private static String FILENAME = "sensor_data";
+    private static String FILE_EXTENSION = ".txt";
 
     public FileManager(Context context){
         this.context = context;
@@ -50,12 +54,11 @@ public class FileManager {
             mExternalStorageAvailable = mExternalStorageWriteable = false;
         }
         if ( mExternalStorageAvailable && mExternalStorageWriteable ){
-            String message = data;
-            File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), "sensor_data.txt");
+            File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), FILENAME + FILE_EXTENSION);
             BufferedWriter bw;
             try {
                 bw = new BufferedWriter(new FileWriter(file, true));
-                bw.write(message);
+                bw.write(data);
                 bw.newLine();
                 bw.close();
                 bw.flush();
@@ -72,7 +75,7 @@ public class FileManager {
         String ret = "";
 
         try {
-            InputStream inputStream = context.openFileInput("sensor_data.txt");
+            InputStream inputStream = context.openFileInput(FILENAME + FILE_EXTENSION);
 
             if ( inputStream != null ) {
                 InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
@@ -120,14 +123,17 @@ public class FileManager {
         @Override
         protected String doInBackground(Void... params) {
             try {
+
+                Date now = new Date();
+
                 JSch ssh = new JSch();
-                Session session = ssh.getSession("cubistudent", "urbysense.dei.uc.pt", 22);
+                Session session = ssh.getSession("isecalumni", "urbysense.dei.uc.pt", 22);
                 // Remember that this is just for testing and we need a quick access, you can add an identity and known_hosts file to prevent
                 // Man In the Middle attacks
                 java.util.Properties config = new java.util.Properties();
                 config.put("StrictHostKeyChecking", "no");
                 session.setConfig(config);
-                session.setPassword("miscubi2020");
+                session.setPassword("miscubi1920");
 
                 session.connect();
                 Channel channel = session.openChannel("sftp");
@@ -139,7 +145,7 @@ public class FileManager {
                 // If you need to display the progress of the upload, read how to do it in the end of the article
 
                 // use the put method , if you are using android remember to remove "file://" and use only the relative path
-                sftp.put(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/sensor_data.txt", "sensor_data.txt");
+                sftp.put(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+ "/" + FILENAME + FILE_EXTENSION, FILENAME + "_" + now.getTime() + FILE_EXTENSION);
                 channel.disconnect();
                 session.disconnect();
             } catch (JSchException e) {
@@ -149,7 +155,7 @@ public class FileManager {
                 System.out.println(e.getMessage());
                 e.printStackTrace();
             }
-            return "Terminado";
+            return "Upload finished";
         }
 
         @Override

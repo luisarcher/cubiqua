@@ -23,10 +23,6 @@ public class MainActivity extends AppCompatActivity implements IView {
     private TextView txtNEntries;
     private TextView txtDeviceList;
 
-    private Button uploadButton;
-    private Button startButton;
-    private Button stopButton;
-
     private String _fileData;
 
     private static int locationRequestCode = 1000;
@@ -35,6 +31,7 @@ public class MainActivity extends AppCompatActivity implements IView {
     private boolean hasStoragePermission;
 
     private SensorRecorder sensorRecorder;
+    private FileManager fileManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,29 +45,31 @@ public class MainActivity extends AppCompatActivity implements IView {
         this.txtDeviceList = (TextView) findViewById(R.id.txtDeviceList);
 
         this.sensorRecorder = new SensorRecorder(this, this);
-        this.checkSensorAvailability();
+        this.fileManager = new FileManager(this);
 
+        this.checkSensorAvailability();
         this.requestStoragePermission();
         this.requestLocationPermission();
 
-        startButton = (Button) findViewById(R.id.btnStart);
+        Button startButton = (Button) findViewById(R.id.btnStart);
         startButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 sensorRecorder.startRecording();
             }
         });
 
-        stopButton = (Button) findViewById(R.id.btnStop);
+        Button stopButton = (Button) findViewById(R.id.btnStop);
         stopButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 sensorRecorder.stopRecording();
+                saveList();
             }
         });
 
-        uploadButton = (Button) findViewById(R.id.btnUpload);
+        Button uploadButton = (Button) findViewById(R.id.btnUpload);
         uploadButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                //uploadFile();
+                fileManager.uploadFile();
             }
         });
     }
@@ -103,17 +102,17 @@ public class MainActivity extends AppCompatActivity implements IView {
 
     public void update() {
         this.txtAccelerometer.setText(this.sensorRecorder.getAccAsStr());
+        this.txtGyroscope.setText(this.sensorRecorder.getGyroAsStr());
         // Populate other elements accordingly
 
         String n_entries = "" + this.sensorRecorder.getEntries().size();
 
         this.txtNEntries.setText(n_entries);
-        StringBuilder _out = new StringBuilder();
 
+        StringBuilder _out = new StringBuilder();
         for (SensorStamp stamp : this.sensorRecorder.getEntries()) {
             _out.append(stamp.toString()).append("\n");
         }
-
         this.txtDeviceList.setText(_out.toString());
     }
 
@@ -168,5 +167,13 @@ public class MainActivity extends AppCompatActivity implements IView {
                 break;
             }
         }
+    }
+
+    public void saveList(){
+        StringBuilder _out = new StringBuilder();
+        for (SensorStamp stamp : this.sensorRecorder.getEntries()) {
+            _out.append(stamp.toString()).append("\n");
+        }
+        fileManager.saveFile(_out.toString());
     }
 }
