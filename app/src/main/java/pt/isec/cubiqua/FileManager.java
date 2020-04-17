@@ -1,16 +1,36 @@
 package pt.isec.cubiqua;
 
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Environment;
+import android.util.Log;
 
+import com.jcraft.jsch.Channel;
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
+import com.jcraft.jsch.SftpException;
+
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 public class FileManager {
 
     /*  TODO save to local storage*/
     /* TODO send to remote server */
+    private Context context;
+
+    public FileManager(Context context){
+        this.context = context;
+    }
 
     public void saveFile(String data){
         boolean mExternalStorageAvailable = false;
@@ -44,6 +64,98 @@ public class FileManager {
                 e.printStackTrace();
             }
             //Nao esquecer:  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+        }
+    }
+
+    private String readFromFile(Context context) {
+
+        String ret = "";
+
+        try {
+            InputStream inputStream = context.openFileInput("sensor_data.txt");
+
+            if ( inputStream != null ) {
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                String receiveString = "";
+                StringBuilder stringBuilder = new StringBuilder();
+
+                while ( (receiveString = bufferedReader.readLine()) != null ) {
+                    stringBuilder.append("\n").append(receiveString);
+                }
+
+                inputStream.close();
+                ret = stringBuilder.toString();
+            }
+        }
+        catch (FileNotFoundException e) {
+            Log.e("Sensor data file", "File not found: " + e.toString());
+        } catch (IOException e) {
+            Log.e("Sensor data file", "Can not read file: " + e.toString());
+        }
+
+        return ret;
+    }
+
+    public void uploadFile() {
+        new LongOperation(this.context).execute();
+    }
+
+    private static class LongOperation extends AsyncTask<Void, Integer, String> {
+
+        private final Context context;
+        ProgressDialog progress;
+
+        LongOperation(Context c){
+            this.context = c;
+        }
+
+        @Override
+        protected void onPreExecute(){
+            progress= new ProgressDialog(this.context);
+            progress.setMessage("Loading...");
+            progress.show();
+        }
+
+        @Override
+        protected String doInBackground(Void... params) {
+            try {
+                JSch ssh = new JSch();
+                Session session = ssh.getSession("cubistudent", "urbysense.dei.uc.pt", 22);
+                // Remember that this is just for testing and we need a quick access, you can add an identity and known_hosts file to prevent
+                // Man In the Middle attacks
+                java.util.Properties config = new java.util.Properties();
+                config.put("StrictHostKeyChecking", "no");
+                session.setConfig(config);
+                session.setPassword("miscubi2020");
+
+                session.connect();
+                Channel channel = session.openChannel("sftp");
+                channel.connect();
+
+                ChannelSftp sftp = (ChannelSftp) channel;
+
+                sftp.cd("data");
+                // If you need to display the progress of the upload, read how to do it in the end of the article
+
+                // use the put method , if you are using android remember to remove "file://" and use only the relative path
+                sftp.put(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/sensor_data.txt", "sensor_data.txt");
+                channel.disconnect();
+                session.disconnect();
+            } catch (JSchException e) {
+                System.out.println(e.getMessage());
+                e.printStackTrace();
+            } catch (SftpException e) {
+                System.out.println(e.getMessage());
+                e.printStackTrace();
+            }
+            return "Terminado";
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            Log.d("PostExecuted", result);
+            progress.dismiss();
         }
 
     }
