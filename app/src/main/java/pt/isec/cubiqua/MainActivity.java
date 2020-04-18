@@ -103,6 +103,9 @@ public class MainActivity extends AppCompatActivity implements IView {
     public void update() {
         this.txtAccelerometer.setText(this.sensorRecorder.getAccAsStr());
         this.txtGyroscope.setText(this.sensorRecorder.getGyroAsStr());
+        this.txtLocation.setText(this.sensorRecorder.getLocAsStr());
+
+
         // Populate other elements accordingly
 
         String n_entries = "" + this.sensorRecorder.getEntries().size();
@@ -123,7 +126,7 @@ public class MainActivity extends AppCompatActivity implements IView {
     }
 
     /* == Check permissions == */
-    private void requestStoragePermission(){
+    private void requestStoragePermission() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     storageRequestCode);
@@ -134,7 +137,7 @@ public class MainActivity extends AppCompatActivity implements IView {
         }
     }
 
-    private void requestLocationPermission(){
+    private void requestLocationPermission() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},

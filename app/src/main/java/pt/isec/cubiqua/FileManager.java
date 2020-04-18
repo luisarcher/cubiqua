@@ -61,7 +61,7 @@ public class FileManager {
                 bw.write(data);
                 bw.newLine();
                 bw.close();
-                bw.flush();
+                //bw.flush();
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -142,6 +142,11 @@ public class FileManager {
                 ChannelSftp sftp = (ChannelSftp) channel;
 
                 sftp.cd("data");
+                sftp.cd("a21201026_a2019107030");
+                sftp.cd("dev_phase");
+                //a21201026_a2019107030
+
+                // /data/a21201026_a2019107030/dev_phase
                 // If you need to display the progress of the upload, read how to do it in the end of the article
 
                 // use the put method , if you are using android remember to remove "file://" and use only the relative path
