@@ -7,6 +7,15 @@
     <string name="lbl_device_list_pholder">Device List: </string>
     <string name="lbl_record_status">Record Status: </string>
 
+    <string name="str_radio_walk">Walk</string>
+    <string name="str_radio_jump">Jump</string>
+    <string name="str_radio_squat">Squat</string>
+    <string name="str_radio_sit">Sit</string>
+    <string name="str_radio_lay">Lay</string>
+
+    <string name="btn_st_start">Start</string>
+    <string name="btn_st_stop">Stop</string>
+
     <string name="loc_pholder">Location placeholder</string>
     <string name="acc_pholder">Accelerometer placeholder</string>
     <string name="gyro_pholder">Gyroscope placeholder</string>

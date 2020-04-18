@@ -9,6 +9,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,6 +38,9 @@ public class MainActivity extends AppCompatActivity implements IView {
     private SensorRecorder sensorRecorder;
     private FileManager fileManager;
 
+    private String selectedActivity;
+    private boolean recordingStatus;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,7 +49,7 @@ public class MainActivity extends AppCompatActivity implements IView {
         //this.txtLocation = (TextView) findViewById(R.id.txtLocation);
         //this.txtAccelerometer = (TextView) findViewById(R.id.txtAccelerometer);
         //this.txtGyroscope = (TextView) findViewById(R.id.txtGyroscope);
-        this.txtRecordStatus = "Not Recording";
+        this.txtRecordStatus = "Not Recording"; // //
         this.txtNEntries = (TextView) findViewById(R.id.txtNEntries);
         this.txtDeviceList = (TextView) findViewById(R.id.txtDeviceList);
 
@@ -56,20 +60,36 @@ public class MainActivity extends AppCompatActivity implements IView {
         this.requestStoragePermission();
         this.requestLocationPermission();
 
-        Button startButton = (Button) findViewById(R.id.btnStart);
+        this.recordingStatus = false;
+
+        /*Button startButton = (Button) findViewById(R.id.btnStart);
         startButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                txtRecordStatus = "Recording";
-                sensorRecorder.startRecording();
+                txtRecordStatus = "Recording"; // //
+                sensorRecorder.startRecording(selectedActivity);
             }
         });
 
         Button stopButton = (Button) findViewById(R.id.btnStop);
         stopButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                txtRecordStatus = "Not Recording";
+                txtRecordStatus = "Not Recording"; // //
                 sensorRecorder.stopRecording();
                 saveList();
+            }
+        });*/
+        final Button startStopButton = (Button) findViewById(R.id.btnStartStop);
+        startStopButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                recordingStatus = !recordingStatus;
+                if (recordingStatus) {
+                    sensorRecorder.startRecording(selectedActivity);
+                    startStopButton.setText(R.string.btn_st_stop);
+                } else {
+                    sensorRecorder.stopRecording();
+                    saveList();
+                    startStopButton.setText(R.string.btn_st_start);
+                }
             }
         });
 
@@ -79,6 +99,36 @@ public class MainActivity extends AppCompatActivity implements IView {
                 fileManager.uploadFile();
             }
         });
+
+    }
+
+    public void onRadioButtonClicked(View view) {
+        // Is the button now checked?
+        boolean checked = ((RadioButton) view).isChecked();
+
+        // Check which radio button was clicked
+        switch(view.getId()) {
+            case R.id.rad_walk:
+                if (checked)
+                    this.selectedActivity = "WALK";
+                    break;
+            case R.id.rad_jump:
+                if (checked)
+                    this.selectedActivity = "JUMP";
+                    break;
+            case R.id.rad_squat:
+                if (checked)
+                    this.selectedActivity = "SQUAT";
+                    break;
+            case R.id.rad_sit:
+                if (checked)
+                    this.selectedActivity = "SITTING";
+                    break;
+            case R.id.rad_lay:
+                if (checked)
+                    this.selectedActivity = "OTHER";
+                    break;
+        }
     }
 
     @Override
