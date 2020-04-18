@@ -5,9 +5,11 @@
     <string name="lbl_acc_pholder">Accelerometer: </string>
     <string name="lbl_gyro_pholder">Gyroscope: </string>
     <string name="lbl_device_list_pholder">Device List: </string>
+    <string name="lbl_record_status">Record Status: </string>
 
     <string name="loc_pholder">Location placeholder</string>
     <string name="acc_pholder">Accelerometer placeholder</string>
     <string name="gyro_pholder">Gyroscope placeholder</string>
     <string name="device_list_pholder">Device List placeholder</string>
+    <string name="recstatus_pholder">Record Status placeholder</string>
 </resources>
