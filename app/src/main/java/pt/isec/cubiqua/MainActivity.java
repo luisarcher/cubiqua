@@ -1,6 +1,7 @@
 package pt.isec.cubiqua;
 
 import android.Manifest;
+import android.app.Application;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -162,7 +163,6 @@ public class MainActivity extends AppCompatActivity implements IView {
         this.txtGyroscope = this.sensorRecorder.getGyroAsStr();
         this.txtLocation = this.sensorRecorder.getLocAsStr();
 
-
         // Populate other elements accordingly
 
         String n_entries = "" + this.sensorRecorder.getEntries().size();
@@ -174,6 +174,10 @@ public class MainActivity extends AppCompatActivity implements IView {
             _out.append(stamp.toString()).append("\n");
         }
         this.txtDeviceList.setText(_out.toString());
+
+        Application app = this.getApplication();
+        //app.getSharedPreferences();
+
     }
 
     private void getSensorList(){
