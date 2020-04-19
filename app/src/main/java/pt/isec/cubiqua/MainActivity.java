@@ -266,9 +266,6 @@ public class MainActivity extends AppCompatActivity implements IView {
             default:
                 return super.onOptionsItemSelected(item);
         }
-
         return true;
     }
-
-
 }

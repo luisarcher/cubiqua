@@ -38,6 +38,4 @@ public class SharedPreferencesManager {
             this.setSessId(0);
         }
     }
-
-
 }

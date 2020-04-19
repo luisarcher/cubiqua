@@ -71,9 +71,8 @@ public class SensorRecorder {
     private void saveNewSensorEntry() {
         this.updateCurrentLocation();
 
-
         SensorStamp stamp = new SensorStamp(this.selectedActivity, this.sharedPreferencesManager.getSessId());
-        stamp.setLocationData(this.lastLatitude, this.lastLongitude, 0.0, false);
+        stamp.setLocationData(this.lastLatitude, this.lastLongitude, this.lastAltitude, false);
         stamp.setAccData(this.last_x_acc, this.last_y_acc, this.last_z_acc);
         stamp.setGyroData(this.last_x_gyro, this.last_y_gyro, this.last_z_gyro);
 

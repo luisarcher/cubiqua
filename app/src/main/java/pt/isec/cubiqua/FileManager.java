@@ -22,13 +22,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Date;
+import java.util.Vector;
+
+import static com.jcraft.jsch.ChannelSftp.SSH_FX_NO_SUCH_FILE;
 
 public class FileManager {
 
     private Context context;
 
     private static String FILENAME = "sensor_data";
-    private static String FILE_EXTENSION = ".txt";
+    private static String FILE_EXTENSION = ".csv";
 
     public FileManager(Context context){
         this.context = context;
@@ -68,6 +71,16 @@ public class FileManager {
         }
     }
 
+    public void deleteFile() {
+        File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), FILENAME + FILE_EXTENSION);
+
+        if(file.delete()) {
+            System.out.println("File deleted successfully");
+        } else {
+            System.out.println("Failed to delete the file");
+        }
+    }
+
     private String readFromFile() {
 
         String ret = "";
@@ -99,16 +112,19 @@ public class FileManager {
     }
 
     public void uploadFile() {
-        new LongOperation(this.context).execute();
+        new LongOperation(this.context, this).execute();
     }
 
     private static class LongOperation extends AsyncTask<Void, Integer, String> {
 
         private final Context context;
-        ProgressDialog progress;
+        private ProgressDialog progress;
+        private FileManager classRef;
 
-        LongOperation(Context c){
+
+        LongOperation(Context c, FileManager ref){
             this.context = c;
+            this.classRef = ref;
         }
 
         @Override
@@ -148,7 +164,14 @@ public class FileManager {
                 // If you need to display the progress of the upload, read how to do it in the end of the article
 
                 // use the put method , if you are using android remember to remove "file://" and use only the relative path
-                sftp.put(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+ "/" + FILENAME + FILE_EXTENSION, FILENAME + "_" + now.getTime() + FILE_EXTENSION);
+                String fileName = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+ "/" + FILENAME + FILE_EXTENSION;
+                sftp.put(fileName, FILENAME + "_" + now.getTime() + FILE_EXTENSION);
+
+                // Make sure the file was uploaded before deleting locally
+                if (exists(sftp, fileName)) {
+                    classRef.deleteFile();
+                }
+
                 channel.disconnect();
                 session.disconnect();
             } catch (JSchException e) {
@@ -167,5 +190,17 @@ public class FileManager {
             progress.dismiss();
         }
 
+        private static boolean exists(ChannelSftp channelSftp, String path) {
+            Vector res = null;
+            try {
+                res = channelSftp.ls(path);
+            } catch (SftpException e) {
+                if (e.id == SSH_FX_NO_SUCH_FILE) {
+                    return false;
+                }
+                Log.d("","Unexpected exception during ls files on sftp: [{"+e.id+"}:{"+e.getMessage()+"}]");
+            }
+            return res != null && !res.isEmpty();
+        }
     }
 }
