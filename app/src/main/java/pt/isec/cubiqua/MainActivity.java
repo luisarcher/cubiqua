@@ -1,7 +1,6 @@
 package pt.isec.cubiqua;
 
 import android.Manifest;
-import android.app.Application;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -162,6 +161,7 @@ public class MainActivity extends AppCompatActivity implements IView {
         this.txtAccelerometer = this.sensorRecorder.getAccAsStr();
         this.txtGyroscope = this.sensorRecorder.getGyroAsStr();
         this.txtLocation = this.sensorRecorder.getLocAsStr();
+
 
         // Populate other elements accordingly
 
