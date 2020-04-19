@@ -31,6 +31,8 @@ public class SensorRecorder {
     private boolean accelerometerAvailable;
     private boolean gyroscopeAvailable;
 
+    private String selectedActivity;
+
     public SensorRecorder(Context context, IView v) {
         this.context = context;
         this.viewActivity = v;
@@ -46,7 +48,9 @@ public class SensorRecorder {
         this.entries = new ArrayList<>();
     }
 
-    public void startRecording() {
+    public void startRecording(String humanActivity) {
+
+        this.selectedActivity = humanActivity;
         sensorManager.registerListener(accelerometerListener, sensorAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
         sensorManager.registerListener(gyroscopeListener, sensorGyroscope, SensorManager.SENSOR_DELAY_NORMAL);
     }
