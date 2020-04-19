@@ -1,7 +1,6 @@
 package pt.isec.cubiqua;
 
 import android.Manifest;
-import android.app.Application;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -24,7 +23,8 @@ public class MainActivity extends AppCompatActivity implements IView {
     private TextView txtNEntries;
     private TextView txtDeviceList;
 
-    private String txtLocation;
+    private TextView txtLocation;
+
     private String txtAccelerometer;
     private String txtGyroscope;
     private String txtRecordStatus;
@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity implements IView {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //this.txtLocation = (TextView) findViewById(R.id.txtLocation);
+        this.txtLocation = (TextView) findViewById(R.id.txtLocation);
         //this.txtAccelerometer = (TextView) findViewById(R.id.txtAccelerometer);
         //this.txtGyroscope = (TextView) findViewById(R.id.txtGyroscope);
         this.txtRecordStatus = "Not Recording";
@@ -63,22 +63,6 @@ public class MainActivity extends AppCompatActivity implements IView {
 
         this.recordingStatus = false;
 
-        /*Button startButton = (Button) findViewById(R.id.btnStart);
-        startButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                txtRecordStatus = "Recording"; // //
-                sensorRecorder.startRecording(selectedActivity);
-            }
-        });
-
-        Button stopButton = (Button) findViewById(R.id.btnStop);
-        stopButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                txtRecordStatus = "Not Recording"; // //
-                sensorRecorder.stopRecording();
-                saveList();
-            }
-        });*/
         final Button startStopButton = (Button) findViewById(R.id.btnStartStop);
         startStopButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -100,7 +84,6 @@ public class MainActivity extends AppCompatActivity implements IView {
                 fileManager.uploadFile();
             }
         });
-
     }
 
     public void onRadioButtonClicked(View view) {
@@ -159,9 +142,9 @@ public class MainActivity extends AppCompatActivity implements IView {
     }
 
     public void update() {
-        this.txtAccelerometer = this.sensorRecorder.getAccAsStr();
-        this.txtGyroscope = this.sensorRecorder.getGyroAsStr();
-        this.txtLocation = this.sensorRecorder.getLocAsStr();
+        /*this.txtAccelerometer = this.sensorRecorder.getAccAsStr();
+        this.txtGyroscope = this.sensorRecorder.getGyroAsStr();*/
+        this.txtLocation.setText(this.sensorRecorder.getLocAsStr());
 
 
         // Populate other elements accordingly
@@ -170,14 +153,11 @@ public class MainActivity extends AppCompatActivity implements IView {
 
         this.txtNEntries.setText(n_entries);
 
-        StringBuilder _out = new StringBuilder();
+        /*StringBuilder _out = new StringBuilder();
         for (SensorStamp stamp : this.sensorRecorder.getEntries()) {
             _out.append(stamp.toString()).append("\n");
         }
-        this.txtDeviceList.setText(_out.toString());
-
-        Application app = this.getApplication();
-        //app.getSharedPreferences();
+        this.txtDeviceList.setText(_out.toString());*/
 
     }
 
@@ -252,10 +232,10 @@ public class MainActivity extends AppCompatActivity implements IView {
                 Intent intent = new Intent(this, SensorDataActivity.class);
                 // Passar dados dos sensores
                 intent.putExtra("recordstatustext",txtRecordStatus);
-                intent.putExtra("locationtext",txtLocation);
+                //intent.putExtra("locationtext",txtLocation);
                 intent.putExtra("accelerometertext",txtAccelerometer);
                 intent.putExtra("gyroscopetext",txtGyroscope);
-                this.startActivity(intent);
+                //this.startActivity(intent);
                 break;
             case R.id.menu_sensor_list:
                 // another startActivity, this is for item with id "menu_sensor_list"

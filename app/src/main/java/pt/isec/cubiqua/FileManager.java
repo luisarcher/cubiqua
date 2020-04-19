@@ -75,9 +75,9 @@ public class FileManager {
         File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), FILENAME + FILE_EXTENSION);
 
         if(file.delete()) {
-            System.out.println("File deleted successfully");
+            Log.d("FileManager - deleteFile()","File deleted successfully");
         } else {
-            System.out.println("Failed to delete the file");
+            Log.d("FileManager - deleteFile()","Failed to delete the file");
         }
     }
 
