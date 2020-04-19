@@ -1,6 +1,7 @@
 package pt.isec.cubiqua;
 
 import android.Manifest;
+import android.app.Application;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -16,8 +17,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 
 public class MainActivity extends AppCompatActivity implements IView {
 
@@ -164,13 +163,6 @@ public class MainActivity extends AppCompatActivity implements IView {
         this.txtGyroscope = this.sensorRecorder.getGyroAsStr();
         this.txtLocation = this.sensorRecorder.getLocAsStr();
 
-        SensorDataActivity sensorData = (SensorDataActivity)
-                getSupportFragmentManager().findFragmentById(R.id.sensor_data_fragment);
-
-        if(sensorData != null)
-        {
-            sensorData.updateData(this.txtRecordStatus, this.txtLocation, this.txtAccelerometer, this.txtGyroscope);
-        }
 
         // Populate other elements accordingly
 
@@ -183,6 +175,10 @@ public class MainActivity extends AppCompatActivity implements IView {
             _out.append(stamp.toString()).append("\n");
         }
         this.txtDeviceList.setText(_out.toString());
+
+        Application app = this.getApplication();
+        //app.getSharedPreferences();
+
     }
 
     private void getSensorList(){
@@ -253,14 +249,13 @@ public class MainActivity extends AppCompatActivity implements IView {
                 // another startActivity, this is for item with id "menu_settings"
                 break;
             case R.id.menu_sensor_data:
-                Fragment fragment = new SensorDataActivity(); // replace your custom fragment class
-                Bundle bundle = new Bundle();
-                FragmentTransaction fragmentTransaction = getSupportFragmentManager(). beginTransaction();
-                bundle.putString("recordstatustext",txtRecordStatus); // use as per your need
-                fragment.setArguments(bundle);
-                fragmentTransaction.addToBackStack(null);
-                fragmentTransaction.replace(R.id.main_content,fragment);
-                fragmentTransaction.commit();
+                Intent intent = new Intent(this, SensorDataActivity.class);
+                // Passar dados dos sensores
+                intent.putExtra("recordstatustext",txtRecordStatus);
+                intent.putExtra("locationtext",txtLocation);
+                intent.putExtra("accelerometertext",txtAccelerometer);
+                intent.putExtra("gyroscopetext",txtGyroscope);
+                this.startActivity(intent);
                 break;
             case R.id.menu_sensor_list:
                 // another startActivity, this is for item with id "menu_sensor_list"

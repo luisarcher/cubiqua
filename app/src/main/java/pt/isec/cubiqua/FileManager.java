@@ -25,8 +25,6 @@ import java.util.Date;
 
 public class FileManager {
 
-    /*  TODO save to local storage*/
-    /* TODO send to remote server */
     private Context context;
 
     private static String FILENAME = "sensor_data";
@@ -70,7 +68,7 @@ public class FileManager {
         }
     }
 
-    private String readFromFile(Context context) {
+    private String readFromFile() {
 
         String ret = "";
 
