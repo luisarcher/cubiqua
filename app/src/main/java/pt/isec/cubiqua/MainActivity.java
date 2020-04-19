@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity implements IView {
         //this.txtLocation = (TextView) findViewById(R.id.txtLocation);
         //this.txtAccelerometer = (TextView) findViewById(R.id.txtAccelerometer);
         //this.txtGyroscope = (TextView) findViewById(R.id.txtGyroscope);
-        this.txtRecordStatus = "Not Recording"; // //
+        this.txtRecordStatus = "Not Recording";
         this.txtNEntries = (TextView) findViewById(R.id.txtNEntries);
         this.txtDeviceList = (TextView) findViewById(R.id.txtDeviceList);
 

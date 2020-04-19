@@ -1,16 +1,35 @@
 package pt.isec.cubiqua;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
+import android.content.IntentSender;
+import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Location;
+import android.os.Looper;
+import android.util.Log;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+
+import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationAvailability;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResponse;
+import com.google.android.gms.location.SettingsClient;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +54,14 @@ public class SensorRecorder {
 
     private String selectedActivity;
 
+    private LocationRequest locationRequest;
+    private LocationCallback locationCallback;
+    private long UPDATE_INTERVAL = 10 * 1000;  /* 10 secs */
+    private long FASTEST_INTERVAL = 2 * 1000; /* 5 sec */
+    private int locationRequestCode = 1000;
+    private LocationSettingsRequest locationSettingsRequest;
+    protected static final int REQUEST_CHECK_SETTINGS = 0x1;//Uma constante arbitrária para os resultados da atividade.
+
     public SensorRecorder(Context context, IView v) {
         this.context = context;
         this.viewActivity = v;
@@ -50,6 +77,57 @@ public class SensorRecorder {
         this.entries = new ArrayList<>();
     }
 
+    // GPS Config Begin
+
+    //Verificar as configurações de localização
+    protected void createLocationRequest() {
+        // Alterar as configurações de localização
+        locationRequest = LocationRequest.create();
+        locationRequest.setInterval(UPDATE_INTERVAL);
+        locationRequest.setFastestInterval(FASTEST_INTERVAL);
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+    }
+
+    protected void startLocationService() {
+        Toast.makeText(context, "A  Iniciar serviços de Localização", Toast.LENGTH_SHORT).show();
+        // Cria o objeto LocationSettingsRequest para ver/receber as configurações de localização
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
+        builder.addLocationRequest(locationRequest);
+        locationSettingsRequest = builder.build();
+    }
+
+    protected void startLocationUpdates() {
+        // Verifique se as configurações de localização estão satisfeitas
+        SettingsClient client = LocationServices.getSettingsClient(context);
+        Task<LocationSettingsResponse> responseTask = client.checkLocationSettings(locationSettingsRequest);
+
+        responseTask.addOnSuccessListener((Activity) context, new OnSuccessListener<LocationSettingsResponse>() {
+            @Override
+            public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
+                fusedLocationClient.requestLocationUpdates(locationRequest,
+                        locationCallback,
+                        Looper.getMainLooper());
+            }
+        });
+
+        responseTask.addOnFailureListener((Activity) context, new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                if (e instanceof ResolvableApiException) {
+                    try {
+                        ResolvableApiException resolvable = (ResolvableApiException) e;
+                        resolvable.startResolutionForResult((Activity) context,
+                                REQUEST_CHECK_SETTINGS);
+                    } catch (IntentSender.SendIntentException sendEx) {
+                        // Ignore the error.
+                    }
+                }
+            }
+        });
+    }
+
+    // GPS Config End
+
     public void startRecording(String humanActivity) {
 
         this.selectedActivity = humanActivity;
@@ -57,6 +135,21 @@ public class SensorRecorder {
 
         sensorManager.registerListener(accelerometerListener, sensorAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
         sensorManager.registerListener(gyroscopeListener, sensorGyroscope, SensorManager.SENSOR_DELAY_NORMAL);
+
+        // GPS
+        locationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                // do work here
+                onLocationChanged(locationResult.getLastLocation());
+            }
+
+            ;
+        };
+        this.createLocationRequest();
+        this.startLocationService();
+        this.startLocationUpdates();
+
     }
 
     public void stopRecording() {
@@ -69,7 +162,7 @@ public class SensorRecorder {
     }
 
     private void saveNewSensorEntry() {
-        this.updateCurrentLocation();
+        //this.updateCurrentLocation();
 
         SensorStamp stamp = new SensorStamp(this.selectedActivity, this.sharedPreferencesManager.getSessId());
         stamp.setLocationData(this.lastLatitude, this.lastLongitude, this.lastAltitude, false);
@@ -135,6 +228,8 @@ public class SensorRecorder {
         });
     }
 
+
+
     // === Listeners ENDS === //
 
     private void checkSensorAvailability() {
@@ -186,5 +281,25 @@ public class SensorRecorder {
         return " Lat: " + lastLatitude +
                 " \nLon: " + lastLongitude +
                 " \nAlt: " + lastAltitude;
+    }
+
+    public void onLocationChanged(Location location) {
+        Toast.makeText(context, "Localização alterada", Toast.LENGTH_SHORT).show();
+        if (location != null) {
+            lastLatitude = location.getLatitude();
+            lastLongitude = location.getLongitude();
+            lastAltitude = location.getAltitude();
+            // Logic to handle location object
+            // TextView txtLatCurr = (TextView) findViewById(R.id.latValueCurrent);
+            // txtLatCurr.setText(String.format(Locale.US, "%s", currentLatitude));
+            // TextView txtLongCurr = (TextView) findViewById(R.id.longValueCurrent);
+            // txtLongCurr.setText(String.format(Locale.US, "%s", currentLongitude));
+            //
+            // ((TextView) findViewById(R.id.altValueCurrent)).setText(String.format(Locale.US, "%s", currentAltitude));
+
+        } else {
+            Toast.makeText(context, "Sem Localização", Toast.LENGTH_SHORT).show();
+        }
+
     }
 }
