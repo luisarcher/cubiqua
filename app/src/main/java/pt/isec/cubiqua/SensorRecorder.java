@@ -20,6 +20,8 @@ public class SensorRecorder {
     private Context context;
     private IView viewActivity;
 
+    private SharedPreferencesManager sharedPreferencesManager;
+
     private FusedLocationProviderClient fusedLocationClient;
 
     private SensorManager sensorManager;
@@ -37,20 +39,22 @@ public class SensorRecorder {
         this.context = context;
         this.viewActivity = v;
 
+        this.sharedPreferencesManager = new SharedPreferencesManager(this.context);
+
         this.fusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
-
         this.sensorManager = (SensorManager) this.context.getSystemService(Context.SENSOR_SERVICE);
-
         this.sensorAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         this.sensorGyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
-
         this.checkSensorAvailability();
+
         this.entries = new ArrayList<>();
     }
 
     public void startRecording(String humanActivity) {
 
         this.selectedActivity = humanActivity;
+        this.sharedPreferencesManager.incSessionId();
+
         sensorManager.registerListener(accelerometerListener, sensorAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
         sensorManager.registerListener(gyroscopeListener, sensorGyroscope, SensorManager.SENSOR_DELAY_NORMAL);
     }
@@ -67,7 +71,8 @@ public class SensorRecorder {
     private void saveNewSensorEntry() {
         this.updateCurrentLocation();
 
-        SensorStamp stamp = new SensorStamp("test_activity");
+
+        SensorStamp stamp = new SensorStamp(this.selectedActivity, this.sharedPreferencesManager.getSessId());
         stamp.setLocationData(this.lastLatitude, this.lastLongitude, 0.0, false);
         stamp.setAccData(this.last_x_acc, this.last_y_acc, this.last_z_acc);
         stamp.setGyroData(this.last_x_gyro, this.last_y_gyro, this.last_z_gyro);

@@ -28,7 +28,15 @@ public class SharedPreferencesManager {
     }
 
     public int getSessId() {
-        return 0;
+        return sharedPreferences.getInt("sessId", 0);
+    }
+
+    public void incSessionId() {
+        if (this.isSetSessId()) {
+            this.setSessId(this.getSessId() + 1);
+        } else {
+            this.setSessId(0);
+        }
     }
 
 
