@@ -1,7 +1,7 @@
 package pt.isec.cubiqua;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.IntentSender;
 import android.hardware.Sensor;
@@ -10,7 +10,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Location;
 import android.os.Looper;
-import android.widget.Toast;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -48,6 +48,7 @@ public class SensorRecorder {
     private SensorManager sensorManager;
     private Sensor sensorAccelerometer;
     private Sensor sensorGyroscope;
+    private Sensor sensorBarometer;
 
     private List<SensorStamp> entries;
 
@@ -63,39 +64,35 @@ public class SensorRecorder {
     private int locationRequestCode = 1000;
     private LocationSettingsRequest locationSettingsRequest;
 
+    private ProgressDialog initialising;
+
     public SensorRecorder(Context context, IView v) {
         this.context = context;
         this.viewActivity = v;
 
         this.sharedPreferencesManager = new SharedPreferencesManager(this.context);
 
-        this.fusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
-        //this.locationManager = (LocationManager) this.context.getSystemService(Context.LOCATION_SERVICE);
+        this.fusedLocationClient = LocationServices.getFusedLocationProviderClient(this.context);
         this.sensorManager = (SensorManager) this.context.getSystemService(Context.SENSOR_SERVICE);
         this.sensorAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         this.sensorGyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+        this.sensorBarometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
         this.checkSensorAvailability();
 
         this.entries = new ArrayList<>();
 
-        //@SuppressLint("MissingPermission")
-        //@SuppressLint("MissingPermission")
-        //Location lastLocation= locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
-        //Location lastLocation = fusedLocationClient.getLastLocation().getResult();
-        //lastLatitude = lastLocation.getLatitude();
-        //lastLongitude = lastLocation.getLongitude();
-        //lastAltitude = lastLocation.getAltitude();
-
     }
 
-    @SuppressLint("MissingPermission")
+    //@SuppressLint("MissingPermission")
     public void startRecording(String humanActivity) {
+
+        initialising = new ProgressDialog(this.context);
+        initialising.setMessage("Initialising...");
+        initialising.show();
+        dismissedProgressDialog = false;
 
         this.selectedActivity = humanActivity;
         this.sharedPreferencesManager.incSessionId();
-
-        sensorManager.registerListener(accelerometerListener, sensorAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-        sensorManager.registerListener(gyroscopeListener, sensorGyroscope, SensorManager.SENSOR_DELAY_NORMAL);
 
         locationCallback = new LocationCallback() {
             @Override
@@ -107,25 +104,43 @@ public class SensorRecorder {
         this.createLocationRequest();
         this.startLocationService();
         this.startLocationUpdates();
+
+        sensorManager.registerListener(accelerometerListener, sensorAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(gyroscopeListener, sensorGyroscope, SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(magnetometerListener, sensorBarometer, SensorManager.SENSOR_DELAY_NORMAL);
+
     }
 
     public void stopRecording() {
         sensorManager.unregisterListener(accelerometerListener);
         sensorManager.unregisterListener(gyroscopeListener);
-        //locationManager.removeUpdates(locationListener);
+        sensorManager.unregisterListener(accelerometerListener);
     }
 
     public List<SensorStamp> getEntries() {
         return entries;
     }
 
+    private boolean dismissedProgressDialog;
     private void saveNewSensorEntry() {
+
+
         //this.updateCurrentLocation();
+
+        // Wait for GPS initialisation
+        if (lastLatitude == 0 || lastLongitude == 0)
+            return;
+
+        if (!dismissedProgressDialog){
+            initialising.dismiss();
+        }
+        dismissedProgressDialog = true;
 
         SensorStamp stamp = new SensorStamp(this.selectedActivity, this.sharedPreferencesManager.getSessId());
         stamp.setLocationData(this.lastLatitude, this.lastLongitude, this.lastAltitude, false);
         stamp.setAccData(this.last_x_acc, this.last_y_acc, this.last_z_acc);
         stamp.setGyroData(this.last_x_gyro, this.last_y_gyro, this.last_z_gyro);
+        stamp.setMagneticData(last_x_mag, last_y_mag, last_z_mag);
 
         entries.add(stamp);
 
@@ -154,29 +169,17 @@ public class SensorRecorder {
     private double lastLatitude;
     private double lastLongitude;
     private double lastAltitude;
-    /*private LocationListener locationListener = new LocationListener() {
-
-        @Override
-        public void onLocationChanged(Location location) {
-            Log.d(LocationListener.class.getName(),"onLocationChanged() - Location changed event");
+    public void onLocationChanged(Location location) {
+        if (location != null) {
             lastLatitude = location.getLatitude();
             lastLongitude = location.getLongitude();
             lastAltitude = location.getAltitude();
 
-            saveNewSensorEntry();
+            Log.d(SensorRecorder.class.getName(),"onLocationChanged()");
+        } else {
+            // Indoor??
         }
-
-        @Override
-        public void onStatusChanged(String provider, int status, Bundle extras) {
-            Log.d(LocationListener.class.getName(),"onStatusChanged()");
-        }
-        @Override
-        public void onProviderEnabled(String provider) {
-            Log.d(LocationListener.class.getName(),"onProviderEnabled()");
-        }
-        @Override
-        public void onProviderDisabled(String provider) {}
-    };*/
+    }
 
     // Gyroscope Listener
     // Gyro
@@ -194,6 +197,24 @@ public class SensorRecorder {
             saveNewSensorEntry();
         }
     };
+
+    //Magnetometer Listener
+    private float last_x_mag;
+    private float last_y_mag;
+    private float last_z_mag;
+    private SensorEventListener magnetometerListener = new SensorEventListener() {
+        public void onAccuracyChanged(Sensor sensor, int acc) {
+        }
+        public void onSensorChanged(SensorEvent event) {
+
+            last_x_mag = event.values[0];
+            last_y_mag = event.values[1];
+            last_z_mag = event.values[2];
+
+            //saveNewSensorEntry();
+        }
+    };
+
     // === Listeners ENDS === //
 
     private void checkSensorAvailability() {
@@ -234,21 +255,26 @@ public class SensorRecorder {
                 " \nZ: " + last_z_acc;
     }
 
-    public String getGyroAsStr(){
+    public String getGyroAsStr() {
         return "X : " + (int) last_x_gyro + " rad/s" +
         "\nY : " + (int) last_y_gyro + " rad/s" +
         "\nZ : " + (int) last_z_gyro + " rad/s";
     }
 
-    public String getLocAsStr(){
+    public String getLocAsStr() {
         return " Lat: " + lastLatitude +
                 " \nLon: " + lastLongitude +
                 " \nAlt: " + lastAltitude;
     }
 
+    public String getMagAsStr() {
+        return "X : " + last_x_gyro + " uT" +
+               "\nY : " + last_y_gyro + " uT" +
+               "\nZ : " + last_z_gyro + " uT";
+    }
+
     /* == GPS == */
     protected void createLocationRequest() {
-        // Alterar as configurações de localização
         locationRequest = LocationRequest.create();
         locationRequest.setInterval(UPDATE_INTERVAL);
         locationRequest.setFastestInterval(FASTEST_INTERVAL);
@@ -256,15 +282,13 @@ public class SensorRecorder {
     }
 
     protected void startLocationService() {
-        Toast.makeText(context, "A iniciar serviços de Localização", Toast.LENGTH_SHORT).show();
-        // Cria o objeto LocationSettingsRequest para ver/receber as configurações de localização
+        //Toast.makeText(context, "A iniciar serviços de Localização", Toast.LENGTH_SHORT).show();
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
         builder.addLocationRequest(locationRequest);
         locationSettingsRequest = builder.build();
     }
 
     protected void startLocationUpdates() {
-        // Verifique se as configurações de localização estão satisfeitas
         SettingsClient client = LocationServices.getSettingsClient(context);
         Task<LocationSettingsResponse> responseTask = client.checkLocationSettings(locationSettingsRequest);
 
@@ -291,16 +315,5 @@ public class SensorRecorder {
                 }
             }
         });
-    }
-
-    public void onLocationChanged(Location location) {
-        if (location != null) {
-            lastLatitude = location.getLatitude();
-            lastLongitude = location.getLongitude();
-            lastAltitude = location.getAltitude();
-        } else {
-            // Indoor
-        }
-
     }
 }

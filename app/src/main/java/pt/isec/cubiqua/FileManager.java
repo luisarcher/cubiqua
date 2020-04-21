@@ -37,6 +37,10 @@ public class FileManager {
         this.context = context;
     }
 
+    public String getFileHeader() {
+        return "session_id,lat,lng,alt,timestamp,x_acc,y_acc,z_acc,x_gyro,y_gyro,z_gyro,x_mag,y_mag,z_mag,activity\n";
+    }
+
     public void saveFile(String data){
         boolean mExternalStorageAvailable = false;
         boolean mExternalStorageWriteable = false;
@@ -56,9 +60,14 @@ public class FileManager {
         }
         if ( mExternalStorageAvailable && mExternalStorageWriteable ){
             File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), FILENAME + FILE_EXTENSION);
+            boolean fileExists = file.exists();
+
             BufferedWriter bw;
             try {
                 bw = new BufferedWriter(new FileWriter(file, true));
+                if (!fileExists) {
+                    bw.write(getFileHeader());
+                }
                 bw.write(data);
                 bw.newLine();
                 bw.close();
@@ -165,10 +174,11 @@ public class FileManager {
 
                 // use the put method , if you are using android remember to remove "file://" and use only the relative path
                 String fileName = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+ "/" + FILENAME + FILE_EXTENSION;
-                sftp.put(fileName, FILENAME + "_" + now.getTime() + FILE_EXTENSION);
+                String dstFileName = FILENAME + "_" + now.getTime() + FILE_EXTENSION;
+                sftp.put(fileName, dstFileName);
 
                 // Make sure the file was uploaded before deleting locally
-                if (exists(sftp, fileName)) {
+                if (exists(sftp, dstFileName)) {
                     classRef.deleteFile();
                 }
 

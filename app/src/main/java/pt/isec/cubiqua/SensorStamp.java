@@ -22,8 +22,10 @@ public class SensorStamp {
     private float y_gyro;
     private float z_gyro;
 
-    // Other Sensor
-    private int other;
+    // Magnetometer
+    private float x_mag;
+    private float y_mag;
+    private float z_mag;
 
     // Activity TAG
     private String tag;
@@ -53,6 +55,12 @@ public class SensorStamp {
         this.z_gyro = z;
     }
 
+    public void setMagneticData(float x, float y, float z) {
+        this.x_mag = x;
+        this.y_mag = y;
+        this.z_mag = z;
+    }
+
     @Override
     public String toString(){
         return "" + sessionId + ","
@@ -66,7 +74,9 @@ public class SensorStamp {
                 + x_gyro + ","
                 + y_gyro + ","
                 + z_gyro + ","
-                + other + ","
+                + x_mag + ","
+                + y_mag + ","
+                + z_mag + ","
                 + tag;
     }
 }

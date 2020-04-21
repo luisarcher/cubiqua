@@ -28,6 +28,7 @@ public class MainActivity extends AppCompatActivity implements IView {
     private String txtAccelerometer;
     private String txtGyroscope;
     private String txtRecordStatus;
+    private TextView txtMagnetometer;
 
     private String _fileData;
 
@@ -53,6 +54,7 @@ public class MainActivity extends AppCompatActivity implements IView {
         this.txtRecordStatus = "Not Recording";
         this.txtNEntries = (TextView) findViewById(R.id.txtNEntries);
         this.txtDeviceList = (TextView) findViewById(R.id.txtDeviceList);
+        this.txtMagnetometer = (TextView) findViewById(R.id.txtMagnetometer);
 
         this.sensorRecorder = new SensorRecorder(this, this);
         this.fileManager = new FileManager(this);
@@ -145,6 +147,7 @@ public class MainActivity extends AppCompatActivity implements IView {
         /*this.txtAccelerometer = this.sensorRecorder.getAccAsStr();
         this.txtGyroscope = this.sensorRecorder.getGyroAsStr();*/
         this.txtLocation.setText(this.sensorRecorder.getLocAsStr());
+        this.txtMagnetometer.setText(this.sensorRecorder.getMagAsStr());
 
 
         // Populate other elements accordingly
