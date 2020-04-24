@@ -23,6 +23,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.SettingsClient;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -112,6 +113,8 @@ public class SensorRecorder {
     }
 
     public void stopRecording() {
+        this.stopLocationUpdates();
+
         sensorManager.unregisterListener(accelerometerListener);
         sensorManager.unregisterListener(gyroscopeListener);
         sensorManager.unregisterListener(accelerometerListener);
@@ -313,6 +316,16 @@ public class SensorRecorder {
                         // Ignore the error.
                     }
                 }
+            }
+        });
+    }
+
+    private void stopLocationUpdates() {
+        //fusedLocationClient.removeLocationUpdates(locationCallback);
+
+        fusedLocationClient.removeLocationUpdates(locationCallback).addOnCompleteListener((Activity) context, new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
             }
         });
     }
