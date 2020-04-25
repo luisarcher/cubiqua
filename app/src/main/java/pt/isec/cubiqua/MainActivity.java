@@ -39,6 +39,7 @@ public class MainActivity extends AppCompatActivity implements IView {
 
     private SensorRecorder sensorRecorder;
     private FileManager fileManager;
+    private DatabaseManager databaseManager;
 
     private String selectedActivity;
     private boolean recordingStatus;
@@ -58,6 +59,7 @@ public class MainActivity extends AppCompatActivity implements IView {
 
         this.sensorRecorder = new SensorRecorder(this, this);
         this.fileManager = new FileManager(this);
+        this.databaseManager = new DatabaseManager(this);
 
         this.checkSensorAvailability();
         this.requestStoragePermission();
@@ -222,7 +224,8 @@ public class MainActivity extends AppCompatActivity implements IView {
         for (SensorStamp stamp : this.sensorRecorder.getEntries()) {
             _out.append(stamp.toString()).append("\n");
         }
-        fileManager.saveFile(_out.toString());
+        //fileManager.saveFile(_out.toString());
+        databaseManager.insertRecordTestAsync();
     }
 
     @Override
