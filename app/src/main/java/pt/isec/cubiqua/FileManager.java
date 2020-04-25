@@ -66,7 +66,10 @@ public class FileManager {
             try {
                 bw = new BufferedWriter(new FileWriter(file, true));
                 if (!fileExists) {
+                    //bw = new BufferedWriter(new FileWriter(file, false));
                     bw.write(getFileHeader());
+                } else {
+
                 }
                 bw.write(data);
                 bw.newLine();
