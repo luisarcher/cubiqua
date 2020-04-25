@@ -24,6 +24,10 @@ import java.io.InputStreamReader;
 import java.util.Date;
 import java.util.Vector;
 
+import weka.core.Instances;
+import weka.core.converters.ArffSaver;
+import weka.core.converters.CSVLoader;
+
 import static com.jcraft.jsch.ChannelSftp.SSH_FX_NO_SUCH_FILE;
 
 public class FileManager {
@@ -31,7 +35,8 @@ public class FileManager {
     private Context context;
 
     private static String FILENAME = "sensor_data";
-    private static String FILE_EXTENSION = ".csv";
+    private static String FILE_EXTENSION_CSV = ".csv";
+    private static String FILE_EXTENSION_ARFF = ".arff";
 
     public FileManager(Context context){
         this.context = context;
@@ -59,7 +64,7 @@ public class FileManager {
             mExternalStorageAvailable = mExternalStorageWriteable = false;
         }
         if ( mExternalStorageAvailable && mExternalStorageWriteable ){
-            File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), FILENAME + FILE_EXTENSION);
+            File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), FILENAME + FILE_EXTENSION_CSV);
             boolean fileExists = file.exists();
 
             BufferedWriter bw;
@@ -80,11 +85,14 @@ public class FileManager {
                 e.printStackTrace();
             }
             //Nao esquecer:  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+            // Converter ficheiro criado para Arff
+            this.convertCSVtoArff(FILENAME);
         }
     }
 
     public void deleteFile() {
-        File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), FILENAME + FILE_EXTENSION);
+        File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), FILENAME + FILE_EXTENSION_CSV);
 
         if(file.delete()) {
             Log.d("FileManager - deleteFile()","File deleted successfully");
@@ -93,12 +101,35 @@ public class FileManager {
         }
     }
 
+    public void convertCSVtoArff(String file_name) {
+
+        try {
+            // load CSV
+            CSVLoader loader = new CSVLoader();
+            loader.setSource(new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),file_name + FILE_EXTENSION_CSV));
+            Instances data = loader.getDataSet();
+
+            // save ARFF
+            ArffSaver saver = new ArffSaver();
+            saver.setInstances(data);
+            saver.setFile(new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),file_name + FILE_EXTENSION_ARFF));
+            saver.setDestination(new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),file_name + FILE_EXTENSION_ARFF));
+            saver.writeBatch();
+
+        }
+        catch (FileNotFoundException e) {
+            Log.e("(convertCSVtoArff) Sensor data file", "File not found: " + e.toString());
+        } catch (IOException e) {
+            Log.e("(convertCSVtoArff) Sensor data file", "Can not read file: " + e.toString());
+        }
+    }
+
     private String readFromFile() {
 
         String ret = "";
 
         try {
-            InputStream inputStream = context.openFileInput(FILENAME + FILE_EXTENSION);
+            InputStream inputStream = context.openFileInput(FILENAME + FILE_EXTENSION_CSV);
 
             if ( inputStream != null ) {
                 InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
@@ -176,8 +207,8 @@ public class FileManager {
                 // If you need to display the progress of the upload, read how to do it in the end of the article
 
                 // use the put method , if you are using android remember to remove "file://" and use only the relative path
-                String fileName = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+ "/" + FILENAME + FILE_EXTENSION;
-                String dstFileName = FILENAME + "_" + now.getTime() + FILE_EXTENSION;
+                String fileName = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+ "/" + FILENAME + FILE_EXTENSION_CSV;
+                String dstFileName = FILENAME + "_" + now.getTime() + FILE_EXTENSION_CSV;
                 sftp.put(fileName, dstFileName);
 
                 // Make sure the file was uploaded before deleting locally
