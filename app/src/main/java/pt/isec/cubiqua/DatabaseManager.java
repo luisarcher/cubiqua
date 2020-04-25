@@ -12,7 +12,6 @@ import java.sql.Statement;
 
 public class DatabaseManager {
 
-    private String url;
     private Connection conn;
     private Context context;
 
@@ -27,8 +26,8 @@ public class DatabaseManager {
 
         try {
             Class.forName("org.postgresql.Driver");
-            this.url = "jdbc:postgresql://192.168.56.175:5432/cubdb";
-            this.conn = DriverManager.getConnection(this.url, username, passwd);
+            String url = "jdbc:postgresql://192.168.56.175:5432/cubdb";
+            this.conn = DriverManager.getConnection(url, username, passwd);
 
         } catch (ClassNotFoundException | SQLException e) {
             e.printStackTrace();

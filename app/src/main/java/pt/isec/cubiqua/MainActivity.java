@@ -32,6 +32,8 @@ public class MainActivity extends AppCompatActivity implements IView {
 
     private String _fileData;
 
+    private Button startStopButton;
+
     private static int locationRequestCode = 1000;
     private static int storageRequestCode = 1;
     private boolean hasLocationPermission;
@@ -61,17 +63,17 @@ public class MainActivity extends AppCompatActivity implements IView {
         this.fileManager = new FileManager(this);
         this.databaseManager = new DatabaseManager(this);
 
-        this.checkSensorAvailability();
         this.requestStoragePermission();
-        this.requestLocationPermission();
 
         this.recordingStatus = false;
 
-        final Button startStopButton = (Button) findViewById(R.id.btnStartStop);
+        startStopButton = (Button) findViewById(R.id.btnStartStop);
+        startStopButton.setEnabled(false);
         startStopButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 recordingStatus = !recordingStatus;
                 if (recordingStatus) {
+
                     sensorRecorder.startRecording(selectedActivity);
                     startStopButton.setText(R.string.btn_st_stop);
                 } else {
@@ -82,7 +84,7 @@ public class MainActivity extends AppCompatActivity implements IView {
             }
         });
 
-        Button uploadButton = (Button) findViewById(R.id.btnUpload);
+        final Button uploadButton = (Button) findViewById(R.id.btnUpload);
         uploadButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 fileManager.uploadFile();
@@ -91,6 +93,10 @@ public class MainActivity extends AppCompatActivity implements IView {
     }
 
     public void onRadioButtonClicked(View view) {
+
+        requestLocationPermission();
+        startStopButton.setEnabled(true);
+
         // Is the button now checked?
         boolean checked = ((RadioButton) view).isChecked();
 
@@ -213,6 +219,7 @@ public class MainActivity extends AppCompatActivity implements IView {
                     this.hasLocationPermission = true;
                 } else {
                     Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show();
+                    this.finishAffinity();
                 }
                 break;
             }
