@@ -38,4 +38,5 @@ dependencies {
 
     //implementation 'org.postgresql:postgresql:42.2.12'
     implementation 'postgresql:postgresql:9.1-901-1.jdbc4'
+    implementation 'com.google.android.material:material:1.1.0'
 }

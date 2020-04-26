@@ -39,7 +39,7 @@ public class SensorRecorder {
     protected static final int REQUEST_CHECK_SETTINGS = 0x1;
 
     private Context context;
-    private IView viewActivity;
+    private IOnNewSensorDataListener listener;
 
     private SharedPreferencesManager sharedPreferencesManager;
 
@@ -67,9 +67,9 @@ public class SensorRecorder {
 
     private ProgressDialog initialising;
 
-    public SensorRecorder(Context context, IView v) {
+    public SensorRecorder(Context context, IOnNewSensorDataListener listener) {
         this.context = context;
-        this.viewActivity = v;
+        this.listener = listener;
 
         this.sharedPreferencesManager = new SharedPreferencesManager(this.context);
 
@@ -82,6 +82,10 @@ public class SensorRecorder {
 
         this.entries = new ArrayList<>();
 
+    }
+
+    public void setListener(IOnNewSensorDataListener l) {
+        this.listener = l;
     }
 
     //@SuppressLint("MissingPermission")
@@ -146,8 +150,8 @@ public class SensorRecorder {
         stamp.setMagneticData(last_x_mag, last_y_mag, last_z_mag);
 
         entries.add(stamp);
-
-        this.viewActivity.update();
+        // TODO
+        this.listener.onNewSensorData();
     }
 
     // === Listeners === //

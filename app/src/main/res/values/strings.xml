@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">cubiqua</string>
 
+    <string name="tab_recorder">Recorder</string>
+    <string name="tab_monitor">Monitor</string>
+
     <string name="lbl_loc_pholder">Location: </string>
     <string name="lbl_acc_pholder">Accelerometer: </string>
     <string name="lbl_gyro_pholder">Gyroscope: </string>
@@ -23,4 +26,6 @@
     <string name="mag_pholder">Magnetometer placeholder</string>
     <string name="device_list_pholder">Device List placeholder</string>
     <string name="recstatus_pholder">Record Status placeholder</string>
+
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

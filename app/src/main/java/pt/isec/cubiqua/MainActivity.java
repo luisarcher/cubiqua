@@ -1,38 +1,28 @@
 package pt.isec.cubiqua;
 
 import android.Manifest;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
-import android.widget.RadioButton;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.viewpager.widget.ViewPager;
 
-public class MainActivity extends AppCompatActivity implements IView {
+import com.google.android.material.tabs.TabItem;
+import com.google.android.material.tabs.TabLayout;
 
-    // XML Elements
-    private TextView txtNEntries;
-    private TextView txtDeviceList;
+public class MainActivity extends AppCompatActivity implements IController {
 
-    private TextView txtLocation;
-
-    private String txtAccelerometer;
-    private String txtGyroscope;
-    private String txtRecordStatus;
-    private TextView txtMagnetometer;
-
-    private String _fileData;
-
-    private Button startStopButton;
+    private TabLayout tabLayout;
+    private ViewPager viewPager;
+    private TabItem tabRecorder;
+    private TabItem tabMonitor;
+    public PageAdapter pagerAdapter;
 
     private static int locationRequestCode = 1000;
     private static int storageRequestCode = 1;
@@ -43,86 +33,65 @@ public class MainActivity extends AppCompatActivity implements IView {
     private FileManager fileManager;
     private DatabaseManager databaseManager;
 
-    private String selectedActivity;
-    private boolean recordingStatus;
+    // This is the internal App status
+    // I believe we can store the fragment state instead
+    private boolean isRecording;
+    private boolean isActivitySelected;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        this.txtLocation = (TextView) findViewById(R.id.txtLocation);
-        //this.txtAccelerometer = (TextView) findViewById(R.id.txtAccelerometer);
-        //this.txtGyroscope = (TextView) findViewById(R.id.txtGyroscope);
-        this.txtRecordStatus = "Not Recording";
-        this.txtNEntries = (TextView) findViewById(R.id.txtNEntries);
-        this.txtDeviceList = (TextView) findViewById(R.id.txtDeviceList);
-        this.txtMagnetometer = (TextView) findViewById(R.id.txtMagnetometer);
+        tabLayout = (TabLayout) findViewById(R.id.tabLayout);
+        tabRecorder = (TabItem) findViewById(R.id.tabRec);
+        tabMonitor = (TabItem) findViewById(R.id.tabMon);
+        viewPager = findViewById(R.id.viewPager);
 
-        this.sensorRecorder = new SensorRecorder(this, this);
+        pagerAdapter = new PageAdapter(getSupportFragmentManager(), tabLayout.getTabCount());
+        viewPager.setAdapter(pagerAdapter);
+        pagerAdapter.injectMainActivity(this);
+
+        tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+
+                viewPager.setCurrentItem(tab.getPosition());
+
+                if (tab.getPosition() == 0) {
+                    pagerAdapter.notifyDataSetChanged();
+                } else if (tab.getPosition() == 2) {
+                    pagerAdapter.notifyDataSetChanged();
+                }
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
+        viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+
+        this.sensorRecorder = new SensorRecorder(this, null);
         this.fileManager = new FileManager(this);
         this.databaseManager = new DatabaseManager(this);
 
         this.requestStoragePermission();
-
-        this.recordingStatus = false;
-
-        startStopButton = (Button) findViewById(R.id.btnStartStop);
-        startStopButton.setEnabled(false);
-        startStopButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                recordingStatus = !recordingStatus;
-                if (recordingStatus) {
-
-                    sensorRecorder.startRecording(selectedActivity);
-                    startStopButton.setText(R.string.btn_st_stop);
-                } else {
-                    sensorRecorder.stopRecording();
-                    saveList();
-                    startStopButton.setText(R.string.btn_st_start);
-                }
-            }
-        });
-
-        final Button uploadButton = (Button) findViewById(R.id.btnUpload);
-        uploadButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                fileManager.uploadFile();
-            }
-        });
+        this.isRecording = false;
+        this.isActivitySelected = false;
     }
 
-    public void onRadioButtonClicked(View view) {
+    public void registerMonitor(TabMonitorFragment m) {
+        this.sensorRecorder.setListener(m);
+    }
 
-        requestLocationPermission();
-        startStopButton.setEnabled(true);
-
-        // Is the button now checked?
-        boolean checked = ((RadioButton) view).isChecked();
-
-        // Check which radio button was clicked
-        switch(view.getId()) {
-            case R.id.rad_walk:
-                if (checked)
-                    this.selectedActivity = "WALK";
-                    break;
-            case R.id.rad_jump:
-                if (checked)
-                    this.selectedActivity = "JUMP";
-                    break;
-            case R.id.rad_squat:
-                if (checked)
-                    this.selectedActivity = "SQUAT";
-                    break;
-            case R.id.rad_sit:
-                if (checked)
-                    this.selectedActivity = "SITTING";
-                    break;
-            case R.id.rad_lay:
-                if (checked)
-                    this.selectedActivity = "OTHER";
-                    break;
-        }
+    public MainActivity getInstance() {
+        return this;
     }
 
     @Override
@@ -151,25 +120,14 @@ public class MainActivity extends AppCompatActivity implements IView {
         }
     }
 
-    public void update() {
-        /*this.txtAccelerometer = this.sensorRecorder.getAccAsStr();
-        this.txtGyroscope = this.sensorRecorder.getGyroAsStr();*/
-        this.txtLocation.setText(this.sensorRecorder.getLocAsStr());
-        this.txtMagnetometer.setText(this.sensorRecorder.getMagAsStr());
+    public void startRecording(String humanActivity) {
+        this.sensorRecorder.startRecording(humanActivity);
+        this.isRecording = true;
+    }
 
-
-        // Populate other elements accordingly
-
-        String n_entries = "" + this.sensorRecorder.getEntries().size();
-
-        this.txtNEntries.setText(n_entries);
-
-        /*StringBuilder _out = new StringBuilder();
-        for (SensorStamp stamp : this.sensorRecorder.getEntries()) {
-            _out.append(stamp.toString()).append("\n");
-        }
-        this.txtDeviceList.setText(_out.toString());*/
-
+    public void stopRecording() {
+        this.sensorRecorder.stopRecording();
+        this.isRecording = false;
     }
 
     private void getSensorList(){
@@ -190,7 +148,7 @@ public class MainActivity extends AppCompatActivity implements IView {
         }
     }
 
-    private void requestLocationPermission() {
+    public void requestLocationPermission() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
@@ -226,7 +184,7 @@ public class MainActivity extends AppCompatActivity implements IView {
         }
     }
 
-    public void saveList(){
+    public void saveCurrentData(){
         StringBuilder _out = new StringBuilder();
         for (SensorStamp stamp : this.sensorRecorder.getEntries()) {
             _out.append(stamp.toString()).append("\n");
@@ -241,18 +199,6 @@ public class MainActivity extends AppCompatActivity implements IView {
             case R.id.menu_settings:
                 // another startActivity, this is for item with id "menu_settings"
                 break;
-            case R.id.menu_sensor_data:
-                Intent intent = new Intent(this, SensorDataActivity.class);
-                // Passar dados dos sensores
-                intent.putExtra("recordstatustext",txtRecordStatus);
-                //intent.putExtra("locationtext",txtLocation);
-                intent.putExtra("accelerometertext",txtAccelerometer);
-                intent.putExtra("gyroscopetext",txtGyroscope);
-                //this.startActivity(intent);
-                break;
-            case R.id.menu_sensor_list:
-                // another startActivity, this is for item with id "menu_sensor_list"
-                break;
             case R.id.menu_about:
                 // another startActivity, this is for item with id "menu_about"
                 break;
@@ -261,4 +207,37 @@ public class MainActivity extends AppCompatActivity implements IView {
         }
         return true;
     }
+
+    public boolean isRecording() {
+        return isRecording;
+    }
+
+    public boolean isActivitySelected() {
+        return isActivitySelected;
+    }
+
+    public void setIsActivitySelected(boolean isSelected) {
+        this.isActivitySelected = isSelected;
+    }
+
+    public int getCurrentEntryCount() {
+        return this.sensorRecorder.getEntries().size();
+    }
+
+    public String getAccAsStr() {
+        return this.sensorRecorder.getAccAsStr();
+    }
+
+    public String getGyroAsStr() {
+        return this.sensorRecorder.getGyroAsStr();
+    }
+
+    public String getLocAsStr() {
+        return this.sensorRecorder.getLocAsStr();
+    }
+
+    public String getMagAsStr() {
+        return this.sensorRecorder.getMagAsStr();
+    }
+
 }

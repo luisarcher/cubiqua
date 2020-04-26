@@ -4,12 +4,7 @@
     <item
         android:id="@+id/menu_settings"
         android:title="Settings" />
-    <item
-        android:id="@+id/menu_sensor_data"
-        android:title="Sensor Data" />
-    <item
-        android:id="@+id/menu_sensor_list"
-        android:title="Sensor List" />
+
     <item
         android:id="@+id/menu_about"
         android:title="About" />

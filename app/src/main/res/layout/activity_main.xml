@@ -9,180 +9,30 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <LinearLayout
-        android:layout_width="wrap_content"
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabLayout"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:padding="10dp"
-        android:orientation="vertical">
+        android:background="@color/colorPrimary"
+        app:tabTextColor="@android:color/white">
 
-        <LinearLayout
+        <com.google.android.material.tabs.TabItem
+            android:id="@+id/tabRec"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:text="Recorder"/>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
-                android:layout_marginTop="5dp"
-                android:layout_marginBottom="5dp"
-                android:text="@string/lbl_mag_pholder"
-                android:textSize="20sp" />
-
-            <TextView
-                android:id="@+id/txtMagnetometer"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
-                android:layout_marginTop="5dp"
-                android:layout_marginBottom="5dp"
-                android:text="@string/mag_pholder"
-                android:textSize="14sp" />
-
-        </LinearLayout>
-
-        <LinearLayout
+        <com.google.android.material.tabs.TabItem
+            android:id="@+id/tabMon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:text="Monitor"/>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
-                android:layout_marginTop="5dp"
-                android:layout_marginBottom="5dp"
-                android:text="@string/lbl_loc_pholder"
-                android:textSize="20sp" />
+    </com.google.android.material.tabs.TabLayout>
 
-            <TextView
-                android:id="@+id/txtLocation"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
-                android:layout_marginTop="5dp"
-                android:layout_marginBottom="5dp"
-                android:text="@string/loc_pholder"
-                android:textSize="14sp" />
-
-        </LinearLayout>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:orientation="vertical"
-        android:padding="10dp">
-
-        <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <RadioButton
-                android:id="@+id/rad_walk"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:onClick="onRadioButtonClicked"
-                android:text="@string/str_radio_walk" />
-
-            <RadioButton
-                android:id="@+id/rad_jump"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:onClick="onRadioButtonClicked"
-                android:text="@string/str_radio_jump" />
-
-            <RadioButton
-                android:id="@+id/rad_squat"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:onClick="onRadioButtonClicked"
-                android:text="@string/str_radio_squat" />
-
-            <RadioButton
-                android:id="@+id/rad_sit"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:onClick="onRadioButtonClicked"
-                android:text="@string/str_radio_sit" />
-
-            <RadioButton
-                android:id="@+id/rad_lay"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:onClick="onRadioButtonClicked"
-                android:text="@string/str_radio_lay" />
-        </RadioGroup>
-
-    </LinearLayout>
-
-    <!-- LOCATION -->
-    <!-- LOCATION ENDS-->
-
-    <!-- ACCELEROMETER -->
-    <!-- ACCELEROMETER ENDS-->
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="10dp"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:padding="20dp">
-
-        <!--<Button
-            android:id="@+id/btnStart"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Start" />
-
-        <Button
-            android:id="@+id/btnStop"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Stop" />-->
-
-        <Button
-            android:id="@+id/btnStartStop"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Start" />
-
-        <Button
-            android:id="@+id/btnUpload"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Upload" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_gravity="right">
-
-    <TextView
-        android:id="@+id/txtNEntries"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20sp"
-        android:text="NEntries"
-        android:textStyle="bold"/>
-
-    <TextView
-        android:id="@+id/txtDeviceList"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5sp"
-        android:text="device_list_placeholder"
-        android:textStyle="bold"/>
-
-    </LinearLayout>
+    <androidx.viewpager.widget.ViewPager
+        android:id="@+id/viewPager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
 </LinearLayout>
