@@ -133,7 +133,6 @@ public class SensorRecorder {
     private boolean dismissedProgressDialog;
     private void saveNewSensorEntry() {
 
-
         //this.updateCurrentLocation();
 
         // Wait for GPS initialisation
@@ -146,7 +145,7 @@ public class SensorRecorder {
         dismissedProgressDialog = true;
 
         SensorStamp stamp = new SensorStamp(this.selectedActivity, this.sharedPreferencesManager.getSessId());
-        stamp.setLocationData(this.lastLatitude, this.lastLongitude, this.lastAltitude, false);
+        stamp.setLocationData(this.lastLatitude, this.lastLongitude, this.lastAltitude, this.lastIsIndoor);
         stamp.setAccData(this.last_x_acc, this.last_y_acc, this.last_z_acc);
         stamp.setGyroData(this.last_x_gyro, this.last_y_gyro, this.last_z_gyro);
         stamp.setMagneticData(last_x_mag, last_y_mag, last_z_mag);
@@ -178,11 +177,17 @@ public class SensorRecorder {
     private double lastLatitude;
     private double lastLongitude;
     private double lastAltitude;
+    private boolean lastIsIndoor;
+    private boolean isIndoor() {
+        // Strategy to detect Indoor
+        return false;
+    }
     public void onLocationChanged(Location location) {
         if (location != null) {
             lastLatitude = location.getLatitude();
             lastLongitude = location.getLongitude();
             lastAltitude = location.getAltitude();
+            lastIsIndoor = isIndoor();
 
             Log.d(SensorRecorder.class.getName(),"onLocationChanged()");
         } else {
@@ -273,7 +278,8 @@ public class SensorRecorder {
     public String getLocAsStr() {
         return " Lat: " + lastLatitude +
                 " \nLon: " + lastLongitude +
-                " \nAlt: " + lastAltitude;
+                " \nAlt: " + lastAltitude +
+                " \nIndoor: " + lastIsIndoor;
     }
 
     public String getMagAsStr() {

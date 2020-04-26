@@ -129,13 +129,17 @@ public class MainActivity extends AppCompatActivity implements IController {
     }
 
     public void startRecording(String humanActivity) {
+        Log.d(MainActivity.class.getName(), "Starting recorder...");
         this.sensorRecorder.startRecording(humanActivity);
         this.isRecording = true;
     }
 
     public void stopRecording() {
+        Log.d(MainActivity.class.getName(), "Stopping recorder...");
         this.sensorRecorder.stopRecording();
         this.isRecording = false;
+
+        this.saveCurrentData();
     }
 
     private void getSensorList(){
@@ -176,6 +180,7 @@ public class MainActivity extends AppCompatActivity implements IController {
                     this.hasStoragePermission = true;
                 } else {
                     Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show();
+                    this.finishAffinity();
                 }
                 break;
             }
@@ -192,13 +197,13 @@ public class MainActivity extends AppCompatActivity implements IController {
         }
     }
 
-    public void saveCurrentData(){
+    private void saveCurrentData(){
         StringBuilder _out = new StringBuilder();
         for (SensorStamp stamp : this.sensorRecorder.getEntries()) {
             _out.append(stamp.toString()).append("\n");
         }
-        //fileManager.saveFile(_out.toString());
-        databaseManager.insertRecordTestAsync();
+        fileManager.saveFile(_out.toString());
+        //databaseManager.insertRecordTestAsync();
     }
 
     @Override

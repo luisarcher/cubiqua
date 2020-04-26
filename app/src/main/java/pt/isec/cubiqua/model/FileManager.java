@@ -116,6 +116,8 @@ public class FileManager {
             saver.setDestination(new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),file_name + FILE_EXTENSION_ARFF));
             saver.writeBatch();
 
+            Log.d(FileManager.class.getName(),"ARFF File saved!");
+
         }
         catch (FileNotFoundException e) {
             Log.e("(convertCSVtoArff) Sensor data file", "File not found: " + e.toString());
@@ -219,11 +221,11 @@ public class FileManager {
                 channel.disconnect();
                 session.disconnect();
             } catch (JSchException e) {
-                System.out.println(e.getMessage());
-                e.printStackTrace();
+                //System.out.println(e.getMessage());
+                //e.printStackTrace();
             } catch (SftpException e) {
-                System.out.println(e.getMessage());
-                e.printStackTrace();
+                //System.out.println(e.getMessage());
+                //e.printStackTrace();
             }
             return "Upload finished";
         }
