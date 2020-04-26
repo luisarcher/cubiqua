@@ -39,15 +39,22 @@
     <string name="reply_title">Default reply action</string>
 
     <!-- Sync Preferences -->
-    <string name="sync_title">Sync email periodically</string>
-    <string name="attachment_title">Download incoming attachments</string>
-    <string name="attachment_summary_on">Automatically download attachments for incoming emails
+    <string name="pref_db_sync_title">Sync with remote SQL Database</string>
+    <string name="pref_db_sync_summary_on">Recorded data will be sent to a remote Database by pressing Stop
     </string>
-    <string name="attachment_summary_off">Only download attachments when manually requested</string>
+    <string name="pref_db_sync_summary_off">Data will not be synchronized to remote SQL Database</string>
 
+    <!-- File server Preferences -->
     <string name="pref_file_server_category">File Server</string>
     <string name="pref_file_server_address">Server Address</string>
     <string name="pref_file_server_username">Username</string>
     <string name="pref_file_server_password">Password</string>
+
+    <!-- Database Preferences -->
+    <string name="pref_db_server_category">Database Server</string>
+    <string name="pref_db_server_name">Database Name</string>
+    <string name="pref_db_server_address">Database Address</string>
+    <string name="pref_db_server_username">Database Username</string>
+    <string name="pref_db_server_password">Database Password</string>
 
 </resources>

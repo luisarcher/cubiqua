@@ -21,6 +21,7 @@ import pt.isec.cubiqua.model.DatabaseManager;
 import pt.isec.cubiqua.model.FileManager;
 import pt.isec.cubiqua.model.SensorRecorder;
 import pt.isec.cubiqua.model.SensorStamp;
+import pt.isec.cubiqua.model.SharedPreferencesManager;
 import pt.isec.cubiqua.ui.IController;
 import pt.isec.cubiqua.ui.PageAdapter;
 import pt.isec.cubiqua.ui.TabMonitorFragment;
@@ -41,6 +42,7 @@ public class MainActivity extends AppCompatActivity implements IController {
     private SensorRecorder sensorRecorder;
     private FileManager fileManager;
     private DatabaseManager databaseManager;
+    private SharedPreferencesManager sharedPreferencesManager;
 
     // This is the internal App status
     // I believe we can store the fragment state instead
@@ -85,6 +87,8 @@ public class MainActivity extends AppCompatActivity implements IController {
         });
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
 
+        this.sharedPreferencesManager = new SharedPreferencesManager(this);
+
         this.sensorRecorder = new SensorRecorder(this, null);
         this.fileManager = new FileManager(this);
         this.databaseManager = new DatabaseManager(this);
@@ -94,7 +98,8 @@ public class MainActivity extends AppCompatActivity implements IController {
         this.isActivitySelected = false;
 
         //SharedPreferences thisSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this /* Activity context */);
-        //String this_name = thisSharedPreferences.getString("server_file_username", "X");
+        //Boolean sync = thisSharedPreferences.getBoolean("db_sync", false);
+        //Toast.makeText(getApplicationContext(), sync.toString(), Toast.LENGTH_LONG).show();
 
     }
 
@@ -208,7 +213,10 @@ public class MainActivity extends AppCompatActivity implements IController {
             _out.append(stamp.toString()).append("\n");
         }
         fileManager.saveFileAsync(_out.toString());
-        //databaseManager.insertRecordTestAsync();
+
+        if (this.sharedPreferencesManager.isDBSync()) {
+            databaseManager.insertFromEntryList(this.sensorRecorder.getEntries());
+        }
     }
 
     @Override

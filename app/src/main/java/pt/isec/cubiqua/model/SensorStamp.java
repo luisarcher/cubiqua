@@ -80,4 +80,70 @@ public class SensorStamp {
                 + tag + ","
                 + indoor;
     }
+
+    /* Getters */
+
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    public long getUnixTime() {
+        return unixTime;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public double getAltitude() {
+        return altitude;
+    }
+
+    public boolean isIndoor() {
+        return indoor;
+    }
+
+    public float getX_acc() {
+        return x_acc;
+    }
+
+    public float getY_acc() {
+        return y_acc;
+    }
+
+    public float getZ_acc() {
+        return z_acc;
+    }
+
+    public float getX_gyro() {
+        return x_gyro;
+    }
+
+    public float getY_gyro() {
+        return y_gyro;
+    }
+
+    public float getZ_gyro() {
+        return z_gyro;
+    }
+
+    public float getX_mag() {
+        return x_mag;
+    }
+
+    public float getY_mag() {
+        return y_mag;
+    }
+
+    public float getZ_mag() {
+        return z_mag;
+    }
+
+    public String getTag() {
+        return tag;
+    }
 }

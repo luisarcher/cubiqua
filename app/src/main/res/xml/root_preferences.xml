@@ -17,35 +17,31 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory app:title="@string/messages_header">
-
-        <EditTextPreference
-            app:key="signature"
-            app:title="@string/signature_title"
-            app:useSimpleSummaryProvider="true" />
-
-        <ListPreference
-            app:defaultValue="reply"
-            app:entries="@array/reply_entries"
-            app:entryValues="@array/reply_values"
-            app:key="reply"
-            app:title="@string/reply_title"
-            app:useSimpleSummaryProvider="true" />
-
+    <PreferenceCategory app:title="@string/sync_header">
+        <SwitchPreferenceCompat
+            app:key="db_sync"
+            app:summaryOff="@string/pref_db_sync_summary_off"
+            app:summaryOn="@string/pref_db_sync_summary_on"
+            app:title="@string/pref_db_sync_title" />
     </PreferenceCategory>
 
-    <PreferenceCategory app:title="@string/sync_header">
-
-        <SwitchPreferenceCompat
-            app:key="sync"
-            app:title="@string/sync_title" />
-
-        <SwitchPreferenceCompat
-            app:dependency="sync"
-            app:key="attachment"
-            app:summaryOff="@string/attachment_summary_off"
-            app:summaryOn="@string/attachment_summary_on"
-            app:title="@string/attachment_title" />
+    <PreferenceCategory app:title="@string/pref_db_server_category">
+        <EditTextPreference
+            app:key="server_db_address"
+            app:title="@string/pref_db_server_address"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:key="server_db_name"
+            app:title="@string/pref_db_server_name"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:key="server_db_username"
+            app:title="@string/pref_db_server_username"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:key="server_db_password"
+            app:title="@string/pref_db_server_password"
+            app:useSimpleSummaryProvider="true" />
 
     </PreferenceCategory>
 

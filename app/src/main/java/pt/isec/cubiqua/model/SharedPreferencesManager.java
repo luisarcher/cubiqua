@@ -18,4 +18,8 @@ public class SharedPreferencesManager {
     public String getServerFileAddress() {
         return sharedPreferences.getString(SERVER_FILE_ADDRESS, "");
     }
+
+    public boolean isDBSync() {
+        return sharedPreferences.getBoolean("db_sync", false);
+    }
 }

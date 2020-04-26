@@ -9,6 +9,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 
 public class DatabaseManager {
 
@@ -36,10 +37,8 @@ public class DatabaseManager {
         }
     }
 
-
-
     private void insertNewRecord(String sqlQuery) {
-        this.connect();
+        //this.connect();
         try {
             Statement st = this.conn.createStatement();
             st.executeQuery(sqlQuery);
@@ -48,17 +47,42 @@ public class DatabaseManager {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        //this.terminate();
+    }
+
+    private void terminate() {
+        try {
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void insertFromEntryList(List<SensorStamp> entries) {
+        new LongOperation(this.context, this, entries).execute();
+    }
+
+    public void asyncMethodInsert(List<SensorStamp> entries) {
+        this.connect();
+        for (SensorStamp entry : entries) {
+            String sqlStatement = this.parseAsSqlQuery(entry.getSessionId(), entry.getTag(), entry.getUnixTime(),
+                    entry.getLatitude(), entry.getLongitude(), entry.getAltitude(), entry.isIndoor(),
+                    entry.getX_acc(), entry.getY_acc(), entry.getZ_acc(),
+                    entry.getX_gyro(), entry.getY_gyro(), entry.getZ_gyro(),
+                    entry.getX_mag(), entry.getY_mag(), entry.getZ_mag());
+            this.insertNewRecord(sqlStatement);
+        }
         this.terminate();
     }
 
-    public void insertRecordAsync(String sess_id, String activity, long instant,
+    /*public void insertRecordAsync(String sess_id, String activity, long instant,
                                   double lat, double lon, double alt, boolean indoor,
                                   float x_acc, float y_acc, float z_acc,
                                   float x_gyro, float y_gyro, float z_gyro,
                                   float x_mag, float y_mag, float z_mag) {
         String sqlQuery = parseAsSqlQuery(sess_id, activity, instant, lat, lon, alt, indoor, x_acc, y_acc, z_acc, x_gyro, y_gyro, z_gyro, x_mag, y_mag, z_mag);
         new LongOperation(this.context, this, sqlQuery).execute();
-    }
+    }*/
 
     private String parseAsSqlQuery(String sess_id, String activity, long instant,
                                 double lat, double lon, double alt, boolean indoor,
@@ -80,26 +104,20 @@ public class DatabaseManager {
                 " ST_SetSRID(ST_Point("+ lon +","+ lat +"),4326));";
     }
 
-    private void terminate() {
-        try {
-            conn.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
     private static class LongOperation extends AsyncTask<Void, Integer, String> {
 
         private final Context context;
         private ProgressDialog progress;
         private DatabaseManager classRef;
-        private String sqlQuery;
+        //private String sqlQuery;
+        private List<SensorStamp> entries;
 
 
-        LongOperation(Context c, DatabaseManager ref, String sqlQuery) {
+        LongOperation(Context c, DatabaseManager ref, List<SensorStamp> entries) {
             this.context = c;
             this.classRef = ref;
-            this.sqlQuery = sqlQuery;
+            //this.sqlQuery = sqlQuery;
+            this.entries = entries;
         }
 
         @Override
@@ -111,7 +129,7 @@ public class DatabaseManager {
 
         @Override
         protected String doInBackground(Void... params) {
-            this.classRef.insertNewRecord(this.sqlQuery);
+            this.classRef.asyncMethodInsert(this.entries);
             return "ok";
         }
 
