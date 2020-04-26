@@ -69,6 +69,8 @@ public class SensorRecorder {
 
     private ProgressDialog initialising;
 
+    private String currentSessionGUID;
+
     public SensorRecorder(Context context, IOnNewSensorDataListener listener) {
         this.context = context;
         this.listener = listener;
@@ -99,7 +101,7 @@ public class SensorRecorder {
         dismissedProgressDialog = false;
 
         this.selectedActivity = humanActivity;
-        this.sharedPreferencesManager.incSessionId();
+        this.currentSessionGUID = java.util.UUID.randomUUID().toString();
 
         locationCallback = new LocationCallback() {
             @Override
@@ -144,7 +146,7 @@ public class SensorRecorder {
         }
         dismissedProgressDialog = true;
 
-        SensorStamp stamp = new SensorStamp(this.selectedActivity, this.sharedPreferencesManager.getSessId());
+        SensorStamp stamp = new SensorStamp(this.selectedActivity, this.currentSessionGUID);
         stamp.setLocationData(this.lastLatitude, this.lastLongitude, this.lastAltitude, this.lastIsIndoor);
         stamp.setAccData(this.last_x_acc, this.last_y_acc, this.last_z_acc);
         stamp.setGyroData(this.last_x_gyro, this.last_y_gyro, this.last_z_gyro);

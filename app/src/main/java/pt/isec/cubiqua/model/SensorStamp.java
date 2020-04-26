@@ -3,7 +3,7 @@ package pt.isec.cubiqua.model;
 public class SensorStamp {
 
     /* session_id lat lng alt timestamp x_acc y_acc z_acc x_gyro y_gyro z_gyro other_sensor... activity */
-    private int sessionId = 1;
+    private String sessionId;
     private long unixTime;
 
     // Location
@@ -30,7 +30,7 @@ public class SensorStamp {
     // Activity TAG
     private String tag;
 
-    public SensorStamp(String activity, int sessionId) {
+    public SensorStamp(String activity, String sessionId) {
         this.unixTime = System.currentTimeMillis() / 1000L;
         this.tag = activity;
         this.sessionId = sessionId;
