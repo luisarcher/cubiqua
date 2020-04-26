@@ -101,7 +101,7 @@ public class FileManager {
         }
     }
 
-    public void convertCSVtoArff(String file_name) {
+    private void convertCSVtoArff(String file_name) {
 
         try {
             // load CSV
@@ -157,17 +157,21 @@ public class FileManager {
     }
 
     public void uploadFile() {
-        new LongOperation(this.context, this).execute();
+        new LongOperationSend(this.context, this).execute();
     }
 
-    private static class LongOperation extends AsyncTask<Void, Integer, String> {
+    public void saveFileAsync(String data) {
+        new LongOperationSave(this.context, this, data).execute();
+    }
+
+    private static class LongOperationSend extends AsyncTask<Void, Integer, String> {
 
         private final Context context;
         private ProgressDialog progress;
         private FileManager classRef;
 
 
-        LongOperation(Context c, FileManager ref){
+        LongOperationSend(Context c, FileManager ref){
             this.context = c;
             this.classRef = ref;
         }
@@ -247,6 +251,39 @@ public class FileManager {
                 Log.d("","Unexpected exception during ls files on sftp: [{"+e.id+"}:{"+e.getMessage()+"}]");
             }
             return res != null && !res.isEmpty();
+        }
+    }
+
+    private static class LongOperationSave extends AsyncTask<Void, Integer, String> {
+
+        private Context context;
+        private ProgressDialog progress;
+        private FileManager classRef;
+        private String data;
+
+        LongOperationSave(Context c, FileManager ref, String data) {
+            this.context = c;
+            this.classRef = ref;
+            this.data = data;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            progress = new ProgressDialog(this.context);
+            progress.setMessage("Saving data...");
+            progress.show();
+        }
+
+        @Override
+        protected String doInBackground(Void... params) {
+            this.classRef.saveFile(this.data);
+            return "ok";
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            Log.d("PostExecuted", result);
+            progress.dismiss();
         }
     }
 }

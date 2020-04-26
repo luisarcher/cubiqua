@@ -5,12 +5,9 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 
-import pt.isec.cubiqua.MainActivity;
-
 public class PageAdapter extends FragmentPagerAdapter {
 
     private int numTabs;
-    private MainActivity activity;
 
     public PageAdapter(@NonNull FragmentManager fm, int numTabs) {
         super(fm);
@@ -31,10 +28,6 @@ public class PageAdapter extends FragmentPagerAdapter {
             default:
                 return null;
         }
-    }
-
-    public void injectMainActivity(MainActivity act) {
-        this.activity = act;
     }
 
     @Override

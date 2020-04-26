@@ -121,11 +121,13 @@ public class SensorRecorder {
     }
 
     public void stopRecording() {
+
         this.stopLocationUpdates();
 
         sensorManager.unregisterListener(accelerometerListener);
         sensorManager.unregisterListener(gyroscopeListener);
         sensorManager.unregisterListener(accelerometerListener);
+
     }
 
     public List<SensorStamp> getEntries() {

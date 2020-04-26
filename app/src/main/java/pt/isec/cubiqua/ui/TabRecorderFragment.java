@@ -79,8 +79,10 @@ public class TabRecorderFragment extends Fragment {
                     mainActivity.startRecording(selectedActivity);
                     startStopButton.setText(R.string.btn_st_stop);
                 } else {
+
                     mainActivity.stopRecording();
                     startStopButton.setText(R.string.btn_st_start);
+
                 }
                 recordingStatusBtnState = !recordingStatusBtnState;
             }

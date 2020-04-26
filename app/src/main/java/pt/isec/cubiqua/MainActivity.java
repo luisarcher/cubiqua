@@ -59,7 +59,6 @@ public class MainActivity extends AppCompatActivity implements IController {
 
         pagerAdapter = new PageAdapter(getSupportFragmentManager(), tabLayout.getTabCount());
         viewPager.setAdapter(pagerAdapter);
-        pagerAdapter.injectMainActivity(this);
 
         tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
@@ -140,6 +139,7 @@ public class MainActivity extends AppCompatActivity implements IController {
     }
 
     public void stopRecording() {
+
         Log.d(MainActivity.class.getName(), "Stopping recorder...");
         this.sensorRecorder.stopRecording();
         this.isRecording = false;
@@ -207,7 +207,7 @@ public class MainActivity extends AppCompatActivity implements IController {
         for (SensorStamp stamp : this.sensorRecorder.getEntries()) {
             _out.append(stamp.toString()).append("\n");
         }
-        fileManager.saveFile(_out.toString());
+        fileManager.saveFileAsync(_out.toString());
         //databaseManager.insertRecordTestAsync();
     }
 
