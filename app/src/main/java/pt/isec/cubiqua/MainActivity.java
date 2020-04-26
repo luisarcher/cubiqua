@@ -213,6 +213,7 @@ public class MainActivity extends AppCompatActivity implements IController {
             _out.append(stamp.toString()).append("\n");
         }
         fileManager.saveFileAsync(_out.toString());
+        this.sensorRecorder.clearEntries();
 
         if (this.sharedPreferencesManager.isDBSync()) {
             databaseManager.insertFromEntryList(this.sensorRecorder.getEntries());

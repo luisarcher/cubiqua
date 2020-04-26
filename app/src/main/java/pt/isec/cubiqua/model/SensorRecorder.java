@@ -140,6 +140,10 @@ public class SensorRecorder {
 
     }
 
+    public void clearEntries() {
+        this.entries.clear();
+    }
+
     public List<SensorStamp> getEntries() {
         return entries;
     }
