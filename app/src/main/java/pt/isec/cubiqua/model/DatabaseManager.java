@@ -1,12 +1,12 @@
 package pt.isec.cubiqua.model;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -36,7 +36,93 @@ public class DatabaseManager {
         }
     }
 
-    public void insertRecordTest() {
+
+
+    private void insertNewRecord(String sqlQuery) {
+        this.connect();
+        try {
+            Statement st = this.conn.createStatement();
+            st.executeQuery(sqlQuery);
+            st.close();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        this.terminate();
+    }
+
+    public void insertRecordAsync(String sess_id, String activity, long instant,
+                                  double lat, double lon, double alt, boolean indoor,
+                                  float x_acc, float y_acc, float z_acc,
+                                  float x_gyro, float y_gyro, float z_gyro,
+                                  float x_mag, float y_mag, float z_mag) {
+        String sqlQuery = parseAsSqlQuery(sess_id, activity, instant, lat, lon, alt, indoor, x_acc, y_acc, z_acc, x_gyro, y_gyro, z_gyro, x_mag, y_mag, z_mag);
+        new LongOperation(this.context, this, sqlQuery).execute();
+    }
+
+    private String parseAsSqlQuery(String sess_id, String activity, long instant,
+                                double lat, double lon, double alt, boolean indoor,
+                                float x_acc, float y_acc, float z_acc,
+                                float x_gyro, float y_gyro, float z_gyro,
+                                float x_mag, float y_mag, float z_mag) {
+        return "INSERT INTO public.records(\n" +
+                "\tsession_id, activity, instant," +
+                " latitude, longitude, altitude, indoor, " +
+                " x_acc, y_acc, z_acc," +
+                " x_gyro, y_gyro, z_gyro," +
+                " x_mag, y_mag, z_mag," +
+                " \"position\")\n" +
+                "\tVALUES ("+ sess_id +", '"+ activity +"', "+ instant +"," +
+                " "+ lat +", "+ lon +" , "+ alt +"," + indoor + ", " +
+                " "+ x_acc +", "+ y_acc +", "+ z_acc +"," +
+                " "+ x_gyro +", "+ y_gyro +", "+ z_gyro +"," +
+                " "+ x_mag +", "+ y_mag +", "+ z_mag +"," +
+                " ST_SetSRID(ST_Point("+ lon +","+ lat +"),4326));";
+    }
+
+    private void terminate() {
+        try {
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static class LongOperation extends AsyncTask<Void, Integer, String> {
+
+        private final Context context;
+        private ProgressDialog progress;
+        private DatabaseManager classRef;
+        private String sqlQuery;
+
+
+        LongOperation(Context c, DatabaseManager ref, String sqlQuery) {
+            this.context = c;
+            this.classRef = ref;
+            this.sqlQuery = sqlQuery;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            progress = new ProgressDialog(this.context);
+            progress.setMessage("Loading...");
+            progress.show();
+        }
+
+        @Override
+        protected String doInBackground(Void... params) {
+            this.classRef.insertNewRecord(this.sqlQuery);
+            return "ok";
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            Log.d("PostExecuted", result);
+            progress.dismiss();
+        }
+    }
+
+    /*public void insertRecordTest() {
 
         this.connect();
 
@@ -47,6 +133,7 @@ public class DatabaseManager {
         String lat = "40.1929798";
         String lon = "-8.4046458";
         String alt = "100.1999969";
+        boolean indoor = false;
 
         String x_acc = "0.2935547";
         String y_acc = "-0.2894287";
@@ -62,13 +149,13 @@ public class DatabaseManager {
 
         String sqlQuery = "INSERT INTO public.records(\n" +
                 "\tsession_id, activity, instant," +
-                " latitude, longitude, altitude, " +
+                " latitude, longitude, altitude, indoor, " +
                 " x_acc, y_acc, z_acc," +
                 " x_gyro, y_gyro, z_gyro," +
                 " x_mag, y_mag, z_mag," +
                 " \"position\")\n" +
                 "\tVALUES ("+ sess_id +", '"+ activity +"', "+ instant +"," +
-                " "+ lat +", "+ lon +" , "+ alt +"," +
+                " "+ lat +", "+ lon +" , "+ alt +"," + indoor + ", " +
                 " "+ x_acc +", "+ y_acc +", "+ z_acc +"," +
                 " "+ x_gyro +", "+ y_gyro +", "+ z_gyro +"," +
                 " "+ x_mag +", "+ y_mag +", "+ z_mag +"," +
@@ -87,53 +174,9 @@ public class DatabaseManager {
         }
 
         this.terminate();
-    }
+    }*/
 
-    public void insertRecordTestAsync() {
+    /*public void insertRecordTestAsync() {
         new LongOperation(this.context, this).execute();
-    }
-
-    public boolean insertRecord() {
-        return true;
-    }
-
-    private void terminate() {
-        try {
-            conn.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private static class LongOperation extends AsyncTask<Void, Integer, String> {
-
-        private final Context context;
-        //private ProgressDialog progress;
-        private DatabaseManager classRef;
-
-
-        LongOperation(Context c, DatabaseManager ref) {
-            this.context = c;
-            this.classRef = ref;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            /*progress = new ProgressDialog(this.context);
-            progress.setMessage("Loading...");
-            progress.show();*/
-        }
-
-        @Override
-        protected String doInBackground(Void... params) {
-            this.classRef.insertRecordTest();
-            return "ok";
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            Log.d("PostExecuted", result);
-            //progress.dismiss();
-        }
-    }
+    }*/
 }

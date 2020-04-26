@@ -9,6 +9,8 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Location;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Looper;
 import android.util.Log;
 
@@ -71,6 +73,9 @@ public class SensorRecorder {
 
     private String currentSessionGUID;
 
+    private ConnectivityManager connManager;
+    private NetworkInfo wifiNetwork;
+
     public SensorRecorder(Context context, IOnNewSensorDataListener listener) {
         this.context = context;
         this.listener = listener;
@@ -85,6 +90,9 @@ public class SensorRecorder {
         this.checkSensorAvailability();
 
         this.entries = new ArrayList<>();
+
+        this.connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        this.wifiNetwork = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 
     }
 
@@ -102,6 +110,8 @@ public class SensorRecorder {
 
         this.selectedActivity = humanActivity;
         this.currentSessionGUID = java.util.UUID.randomUUID().toString();
+
+        lastIsIndoor = wifiNetwork.isConnected();
 
         locationCallback = new LocationCallback() {
             @Override
@@ -181,17 +191,12 @@ public class SensorRecorder {
     private double lastLatitude;
     private double lastLongitude;
     private double lastAltitude;
-    private boolean lastIsIndoor;
-    private boolean isIndoor() {
-        // Strategy to detect Indoor
-        return false;
-    }
+    private boolean lastIsIndoor; // set by wifi availability
     public void onLocationChanged(Location location) {
         if (location != null) {
             lastLatitude = location.getLatitude();
             lastLongitude = location.getLongitude();
             lastAltitude = location.getAltitude();
-            lastIsIndoor = isIndoor();
 
             Log.d(SensorRecorder.class.getName(),"onLocationChanged()");
         } else {
