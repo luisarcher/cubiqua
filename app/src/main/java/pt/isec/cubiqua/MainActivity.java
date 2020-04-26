@@ -16,6 +16,14 @@ import androidx.viewpager.widget.ViewPager;
 import com.google.android.material.tabs.TabItem;
 import com.google.android.material.tabs.TabLayout;
 
+import pt.isec.cubiqua.model.DatabaseManager;
+import pt.isec.cubiqua.model.FileManager;
+import pt.isec.cubiqua.model.SensorRecorder;
+import pt.isec.cubiqua.model.SensorStamp;
+import pt.isec.cubiqua.ui.IController;
+import pt.isec.cubiqua.ui.PageAdapter;
+import pt.isec.cubiqua.ui.TabMonitorFragment;
+
 public class MainActivity extends AppCompatActivity implements IController {
 
     private TabLayout tabLayout;

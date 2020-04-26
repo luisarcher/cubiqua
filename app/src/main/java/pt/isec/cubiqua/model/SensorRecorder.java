@@ -1,4 +1,4 @@
-package pt.isec.cubiqua;
+package pt.isec.cubiqua.model;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -30,6 +30,8 @@ import com.google.android.gms.tasks.Task;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import pt.isec.cubiqua.ui.IOnNewSensorDataListener;
 
 public class SensorRecorder {
 

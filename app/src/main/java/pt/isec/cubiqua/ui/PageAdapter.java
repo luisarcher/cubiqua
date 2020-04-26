@@ -1,9 +1,11 @@
-package pt.isec.cubiqua;
+package pt.isec.cubiqua.ui;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
+
+import pt.isec.cubiqua.MainActivity;
 
 public class PageAdapter extends FragmentPagerAdapter {
 

@@ -1,4 +1,4 @@
-package pt.isec.cubiqua;
+package pt.isec.cubiqua.model;
 
 import android.content.Context;
 import android.os.AsyncTask;

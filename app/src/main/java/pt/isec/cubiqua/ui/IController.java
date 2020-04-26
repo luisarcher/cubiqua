@@ -1,4 +1,4 @@
-package pt.isec.cubiqua;
+package pt.isec.cubiqua.ui;
 
 public interface IController {
 
@@ -6,4 +6,8 @@ public interface IController {
     void saveCurrentData();
     void startRecording(String humanActivity);
     void stopRecording();
+
+    boolean isActivitySelected();
+    boolean isRecording();
+    void setIsActivitySelected(boolean isSelected);
 }

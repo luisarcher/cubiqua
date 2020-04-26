@@ -1,4 +1,4 @@
-package pt.isec.cubiqua;
+package pt.isec.cubiqua.ui;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -12,6 +12,9 @@ import android.widget.RadioGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+
+import pt.isec.cubiqua.MainActivity;
+import pt.isec.cubiqua.R;
 
 
 /**
@@ -58,16 +61,15 @@ public class TabRecorderFragment extends Fragment {
         startStopButton = (Button) getView().findViewById(R.id.btnStartStop);
 
         // Restore button status according to main activity data
-        if (!((MainActivity)getActivity()).isActivitySelected()) {
+        if (!mainActivity.isActivitySelected()) {
             startStopButton.setEnabled(false);
         }
-        if (((MainActivity)getActivity()).isRecording()) {
+        if (mainActivity.isRecording()) {
             recordingStatusBtnState = true;
             startStopButton.setText(R.string.btn_st_stop);
         } else {
             startStopButton.setText(R.string.btn_st_start);
         }
-
 
         startStopButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -106,7 +108,7 @@ public class TabRecorderFragment extends Fragment {
         public void onClick(final View view) {
             mainActivity.requestLocationPermission();
             startStopButton.setEnabled(true);
-            ((MainActivity)getActivity()).setIsActivitySelected(true);
+            mainActivity.setIsActivitySelected(true);
 
             // Is the button now checked?
             boolean checked = ((RadioButton) view).isChecked();

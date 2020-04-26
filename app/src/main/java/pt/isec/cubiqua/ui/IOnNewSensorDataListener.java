@@ -1,4 +1,4 @@
-package pt.isec.cubiqua;
+package pt.isec.cubiqua.ui;
 
 public interface IOnNewSensorDataListener {
 
