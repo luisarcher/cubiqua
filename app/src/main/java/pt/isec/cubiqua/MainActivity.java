@@ -1,6 +1,8 @@
 package pt.isec.cubiqua;
 
 import android.Manifest;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
@@ -11,6 +13,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.preference.PreferenceManager;
 import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.material.tabs.TabItem;
@@ -92,6 +95,13 @@ public class MainActivity extends AppCompatActivity implements IController {
         this.requestStoragePermission();
         this.isRecording = false;
         this.isActivitySelected = false;
+
+        SharedPreferences thisSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this /* Activity context */);
+        String this_name = thisSharedPreferences.getString("server_file_username", "X");
+
+        /*SharedPreferences settSharedPreferences = PreferenceManager.getDefaultSharedPreferences();
+        String sett_name = settSharedPreferences.getString("server_file_username", "X");*/
+
     }
 
     public void registerMonitor(TabMonitorFragment m) {
@@ -211,6 +221,8 @@ public class MainActivity extends AppCompatActivity implements IController {
         switch(item.getItemId()) {
             case R.id.menu_settings:
                 // another startActivity, this is for item with id "menu_settings"
+                Intent i = new Intent(this, SettingsActivity.class);
+                startActivityForResult(i,1);
                 break;
             case R.id.menu_about:
                 // another startActivity, this is for item with id "menu_about"
