@@ -77,7 +77,7 @@ public class SensorStamp {
                 + x_mag + ","
                 + y_mag + ","
                 + z_mag + ","
-                + indoor + ","
-                + tag;
+                + tag + ","
+                + indoor;
     }
 }
