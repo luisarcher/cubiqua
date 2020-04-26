@@ -2,7 +2,6 @@ package pt.isec.cubiqua;
 
 import android.Manifest;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,7 +12,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import androidx.preference.PreferenceManager;
 import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.material.tabs.TabItem;
@@ -96,11 +94,8 @@ public class MainActivity extends AppCompatActivity implements IController {
         this.isRecording = false;
         this.isActivitySelected = false;
 
-        SharedPreferences thisSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this /* Activity context */);
-        String this_name = thisSharedPreferences.getString("server_file_username", "X");
-
-        /*SharedPreferences settSharedPreferences = PreferenceManager.getDefaultSharedPreferences();
-        String sett_name = settSharedPreferences.getString("server_file_username", "X");*/
+        //SharedPreferences thisSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this /* Activity context */);
+        //String this_name = thisSharedPreferences.getString("server_file_username", "X");
 
     }
 

@@ -3,19 +3,29 @@ package pt.isec.cubiqua.model;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import static android.content.Context.MODE_PRIVATE;
+import androidx.preference.PreferenceManager;
 
 public class SharedPreferencesManager {
+
+    public static final String SERVER_FILE_ADDRESS = "server_file_address";
 
     private SharedPreferences sharedPreferences;
 
     public SharedPreferencesManager(Context c) {
-        this.sharedPreferences = c.getSharedPreferences("cub", MODE_PRIVATE);
+
+        this.sharedPreferences = PreferenceManager.getDefaultSharedPreferences(c);
     }
 
     private void init() {
 
     }
+
+    public String getServerFileAddress() {
+        return sharedPreferences.getString(SERVER_FILE_ADDRESS, "");
+    }
+
+
+    /* vvv to be removed vvv */
 
     public boolean isSetSessId() {
         return sharedPreferences.contains("sessId");
