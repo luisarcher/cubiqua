@@ -45,4 +45,12 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory app:title="System Info">
+        <Preference
+            app:key="pref_static_field_key"
+            app:selectable="false"
+            app:persistent="false"
+            app:title="About"
+            app:summary="Made by\nLuís Jordão and Emanuel Ferreira."/>
+    </PreferenceCategory>
 </PreferenceScreen>
