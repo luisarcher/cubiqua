@@ -53,7 +53,7 @@ public class SensorRecorder {
     private SensorManager sensorManager;
     private Sensor sensorAccelerometer;
     private Sensor sensorGyroscope;
-    private Sensor sensorBarometer;
+    private Sensor sensorMagnetometer;
 
     private List<SensorStamp> entries;
 
@@ -86,7 +86,7 @@ public class SensorRecorder {
         this.sensorManager = (SensorManager) this.context.getSystemService(Context.SENSOR_SERVICE);
         this.sensorAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         this.sensorGyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
-        this.sensorBarometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+        this.sensorMagnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
         this.checkSensorAvailability();
 
         this.entries = new ArrayList<>();
@@ -126,7 +126,7 @@ public class SensorRecorder {
 
         sensorManager.registerListener(accelerometerListener, sensorAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
         sensorManager.registerListener(gyroscopeListener, sensorGyroscope, SensorManager.SENSOR_DELAY_NORMAL);
-        sensorManager.registerListener(magnetometerListener, sensorBarometer, SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(magnetometerListener, sensorMagnetometer, SensorManager.SENSOR_DELAY_NORMAL);
 
     }
 
@@ -136,7 +136,7 @@ public class SensorRecorder {
 
         sensorManager.unregisterListener(accelerometerListener);
         sensorManager.unregisterListener(gyroscopeListener);
-        sensorManager.unregisterListener(accelerometerListener);
+        sensorManager.unregisterListener(magnetometerListener);
 
     }
 
