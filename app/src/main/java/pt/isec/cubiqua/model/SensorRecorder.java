@@ -307,6 +307,7 @@ public class SensorRecorder {
         locationRequest.setInterval(UPDATE_INTERVAL);
         locationRequest.setFastestInterval(FASTEST_INTERVAL);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setSmallestDisplacement(LOCATION_REQUEST_MINDISTANCE);
     }
 
     protected void startLocationService() {
