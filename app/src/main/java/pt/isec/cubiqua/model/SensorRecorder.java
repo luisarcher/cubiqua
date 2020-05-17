@@ -31,6 +31,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import pt.isec.cubiqua.ui.IOnNewSensorDataListener;
@@ -71,7 +72,7 @@ public class SensorRecorder {
 
     private ProgressDialog initialising;
 
-    private String currentSessionGUID;
+    //private String currentSessionGUID;
 
     private ConnectivityManager connManager;
     private NetworkInfo wifiNetwork;
@@ -109,7 +110,7 @@ public class SensorRecorder {
         dismissedProgressDialog = false;
 
         this.selectedActivity = humanActivity;
-        this.currentSessionGUID = java.util.UUID.randomUUID().toString();
+        //this.currentSessionGUID = java.util.UUID.randomUUID().toString();
 
         lastIsIndoor = wifiNetwork.isConnected();
 
@@ -162,7 +163,7 @@ public class SensorRecorder {
         }
         dismissedProgressDialog = true;
 
-        SensorStamp stamp = new SensorStamp(this.selectedActivity, this.currentSessionGUID);
+        SensorStamp stamp = new SensorStamp(this.selectedActivity, this.getSessId());
         stamp.setLocationData(this.lastLatitude, this.lastLongitude, this.lastAltitude, this.lastIsIndoor);
         stamp.setAccData(this.last_x_acc, this.last_y_acc, this.last_z_acc);
         stamp.setGyroData(this.last_x_gyro, this.last_y_gyro, this.last_z_gyro);
@@ -171,6 +172,19 @@ public class SensorRecorder {
         entries.add(stamp);
         // TODO
         this.listener.onNewSensorData();
+    }
+
+    private String getSessId(){
+        int mon = Calendar.getInstance().get(Calendar.MONTH) + 1;
+        int _day = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
+        String day = (_day < 10 ? "0" + _day : "" + _day);
+        int _hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+        String hour = (_hour < 10 ? "0" + _hour : "" + _hour);
+        int _min = Calendar.getInstance().get(Calendar.MINUTE);
+        String min = (_min < 10 ? "0" + _min : "" + _min);
+        int _sec = Calendar.getInstance().get(Calendar.SECOND);
+        String sec = (_sec < 10 ? "0" + _sec : "" + _sec);
+        return "" + mon + day + hour + min + sec;
     }
 
     // === Listeners === //
@@ -307,6 +321,7 @@ public class SensorRecorder {
         locationRequest.setInterval(UPDATE_INTERVAL);
         locationRequest.setFastestInterval(FASTEST_INTERVAL);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setSmallestDisplacement(LOCATION_REQUEST_MINDISTANCE); // Location request minimal distance
     }
 
     protected void startLocationService() {

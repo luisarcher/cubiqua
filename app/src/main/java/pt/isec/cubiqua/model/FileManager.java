@@ -43,7 +43,7 @@ public class FileManager {
     }
 
     public String getFileHeader() {
-        return "session_id,lat,lng,alt,timestamp,x_acc,y_acc,z_acc,x_gyro,y_gyro,z_gyro,x_mag,y_mag,z_mag,activity,indoor\n";
+        return "session_id,latitude,longitude,altitude,instante,x_acc,y_acc,z_acc,x_gyro,y_gyro,z_gyro,x_mag,y_mag,z_mag,activity,indoor\n";
     }
 
     public void saveFile(String data){

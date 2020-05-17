@@ -7,6 +7,7 @@ import android.util.Log;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
@@ -129,7 +130,8 @@ public class DatabaseManager {
 
         @Override
         protected String doInBackground(Void... params) {
-            this.classRef.asyncMethodInsert(this.entries);
+            //this.classRef.asyncMethodInsert(this.entries);
+            this.classRef.insertRecordTest();
             return "ok";
         }
 
@@ -140,7 +142,7 @@ public class DatabaseManager {
         }
     }
 
-    /*public void insertRecordTest() {
+    public void insertRecordTest() {
 
         this.connect();
 
@@ -192,7 +194,7 @@ public class DatabaseManager {
         }
 
         this.terminate();
-    }*/
+    }
 
     /*public void insertRecordTestAsync() {
         new LongOperation(this.context, this).execute();
