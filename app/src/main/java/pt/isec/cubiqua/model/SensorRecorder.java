@@ -8,6 +8,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.icu.util.Calendar;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -31,7 +32,6 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 import pt.isec.cubiqua.ui.IOnNewSensorDataListener;
@@ -321,7 +321,7 @@ public class SensorRecorder {
         locationRequest.setInterval(UPDATE_INTERVAL);
         locationRequest.setFastestInterval(FASTEST_INTERVAL);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        locationRequest.setSmallestDisplacement(LOCATION_REQUEST_MINDISTANCE); // Location request minimal distance
+        locationRequest.setSmallestDisplacement(LOCATION_REQUEST_MINDISTANCE);
     }
 
     protected void startLocationService() {
