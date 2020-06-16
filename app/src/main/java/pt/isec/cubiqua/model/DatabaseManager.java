@@ -16,20 +16,25 @@ public class DatabaseManager {
 
     private Connection conn;
     private Context context;
+    private SharedPreferencesManager sharedPreferencesManager;
 
     public DatabaseManager(Context c) {
         this.context = c;
+        this.sharedPreferencesManager = new SharedPreferencesManager(this.context);
     }
 
     private void connect() {
 
-        String username = "postgres";
-        String passwd = "postgres";
+
+        String _address = sharedPreferencesManager.getServerDatabaseAddress();
+        String _dbName = sharedPreferencesManager.getServerDatabaseName();
+        String _username = sharedPreferencesManager.getServerDatabaseUsername();
+        String _passwd = sharedPreferencesManager.getServerDatabasePassword();
 
         try {
             Class.forName("org.postgresql.Driver");
-            String url = "jdbc:postgresql://192.168.56.175:5432/cubdb";
-            this.conn = DriverManager.getConnection(url, username, passwd);
+            String url = "jdbc:postgresql://"+ _address +":5432/" + _dbName;
+            this.conn = DriverManager.getConnection(url, _username, _passwd);
 
         } catch (ClassNotFoundException | SQLException e) {
             e.printStackTrace();

@@ -38,8 +38,11 @@ public class FileManager {
     private static String FILE_EXTENSION_CSV = ".csv";
     private static String FILE_EXTENSION_ARFF = ".arff";
 
+    SharedPreferencesManager sharedPreferencesManager;
+
     public FileManager(Context context){
         this.context = context;
+        this.sharedPreferencesManager = new SharedPreferencesManager(this.context);
     }
 
     public String getFileHeader() {
@@ -164,6 +167,7 @@ public class FileManager {
         new LongOperationSave(this.context, this, data).execute();
     }
 
+    // Connecto to SSH and upload file | File Server
     private static class LongOperationSend extends AsyncTask<Void, Integer, String> {
 
         private final Context context;
@@ -187,16 +191,20 @@ public class FileManager {
         protected String doInBackground(Void... params) {
             try {
 
+                String _serverAddress = this.classRef.sharedPreferencesManager.getServerFileAddress();
+                String _serverUsername = this.classRef.sharedPreferencesManager.getServerFileUsername();
+                String _serverPasswd = this.classRef.sharedPreferencesManager.getServerFilePassword();
+
                 Date now = new Date();
 
                 JSch ssh = new JSch();
-                Session session = ssh.getSession("isecalumni", "urbysense.dei.uc.pt", 22);
+                Session session = ssh.getSession(_serverUsername, _serverAddress, 22);
                 // Remember that this is just for testing and we need a quick access, you can add an identity and known_hosts file to prevent
                 // Man In the Middle attacks
                 java.util.Properties config = new java.util.Properties();
                 config.put("StrictHostKeyChecking", "no");
                 session.setConfig(config);
-                session.setPassword("miscubi1920");
+                session.setPassword(_serverPasswd);
 
                 session.connect();
                 Channel channel = session.openChannel("sftp");
@@ -254,6 +262,7 @@ public class FileManager {
         }
     }
 
+    // Save data Async (after pressing stop)
     private static class LongOperationSave extends AsyncTask<Void, Integer, String> {
 
         private Context context;
