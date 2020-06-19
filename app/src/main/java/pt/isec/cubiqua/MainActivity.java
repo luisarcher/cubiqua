@@ -20,7 +20,6 @@ import com.google.android.material.tabs.TabLayout;
 import pt.isec.cubiqua.model.DatabaseManager;
 import pt.isec.cubiqua.model.FileManager;
 import pt.isec.cubiqua.model.SensorRecorder;
-import pt.isec.cubiqua.model.SensorStamp;
 import pt.isec.cubiqua.model.SharedPreferencesManager;
 import pt.isec.cubiqua.ui.IController;
 import pt.isec.cubiqua.ui.PageAdapter;
@@ -209,9 +208,15 @@ public class MainActivity extends AppCompatActivity implements IController {
 
     private void saveCurrentData(){
         StringBuilder _out = new StringBuilder();
-        for (SensorStamp stamp : this.sensorRecorder.getEntries()) {
+        /*for (SensorStamp stamp : this.sensorRecorder.getEntries()) {
             _out.append(stamp.toString()).append("\n");
+        }*/
+        for (int i = 0; i < this.sensorRecorder.getEntries().size()-1 ; i++){
+            _out.append(this.sensorRecorder.getEntries().get(i).toString()).append("\n");
         }
+        _out.append(this.sensorRecorder.getEntries().get(
+                this.sensorRecorder.getEntries().size()-1).toString()
+        );
         fileManager.saveFileAsync(_out.toString());
         this.sensorRecorder.clearEntries();
 
