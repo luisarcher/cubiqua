@@ -77,6 +77,7 @@ public class SensorRecorder {
 
     private ConnectivityManager connManager;
     private NetworkInfo wifiNetwork;
+    private String sessionId;
 
     public SensorRecorder(Context context, IOnNewSensorDataListener listener) {
         this.context = context;
@@ -104,6 +105,8 @@ public class SensorRecorder {
 
     //@SuppressLint("MissingPermission")
     public void startRecording(String humanActivity) {
+
+        this.sessionId = this.getSessId();
 
         initialising = new ProgressDialog(this.context);
         initialising.setMessage("Initialising...");
@@ -139,7 +142,6 @@ public class SensorRecorder {
         sensorManager.unregisterListener(accelerometerListener);
         sensorManager.unregisterListener(gyroscopeListener);
         sensorManager.unregisterListener(magnetometerListener);
-
     }
 
     public void clearEntries() {
@@ -164,7 +166,7 @@ public class SensorRecorder {
         }
         dismissedProgressDialog = true;
 
-        SensorStamp stamp = new SensorStamp(this.selectedActivity, this.getSessId());
+        SensorStamp stamp = new SensorStamp(this.selectedActivity, this.sessionId);
         stamp.setLocationData(this.lastLatitude, this.lastLongitude, this.lastAltitude, this.lastIsIndoor);
         stamp.setAccData(this.last_x_acc, this.last_y_acc, this.last_z_acc);
         stamp.setGyroData(this.last_x_gyro, this.last_y_gyro, this.last_z_gyro);
