@@ -42,6 +42,7 @@ public class SensorRecorder {
     private static final long LOCATION_REQUEST_MINDISTANCE = 10;  /* 10 METERS */
     private static final int LOCATION_REQUEST_MINTIME = 5 * 1000; /* 5 sec */
     protected static final int REQUEST_CHECK_SETTINGS = 0x1;
+    public static final float SENSOR_NOISE_THRESHOLD = (float)0.05;
 
     private Context context;
     private IOnNewSensorDataListener listener;
@@ -198,11 +199,18 @@ public class SensorRecorder {
         }
         public void onSensorChanged(SensorEvent event) {
             float[] acceleration = accelerometerFilter(event);
-            last_x_acc = acceleration[0];
-            last_y_acc = acceleration[1];
-            last_z_acc = acceleration[2];
 
-            saveNewSensorEntry();
+            float[] oldValues = new float[] {
+                    last_x_acc,
+                    last_y_acc,
+                    last_z_acc
+            };
+            if (checkForNonNoiseValues(oldValues, acceleration)) {
+                last_x_acc = acceleration[0];
+                last_y_acc = acceleration[1];
+                last_z_acc = acceleration[2];
+                saveNewSensorEntry();
+            }
         }
     };
 
@@ -231,11 +239,18 @@ public class SensorRecorder {
         public void onAccuracyChanged(Sensor sensor, int acc) {
         }
         public void onSensorChanged(SensorEvent event) {
-            last_x_gyro = event.values[0];
-            last_y_gyro = event.values[1];
-            last_z_gyro = event.values[2];
 
-            saveNewSensorEntry();
+            float[] oldValues = new float[] {
+                    last_x_gyro,
+                    last_y_gyro,
+                    last_z_gyro
+            };
+            if (checkForNonNoiseValues(oldValues, event.values)) {
+                last_x_gyro = event.values[0];
+                last_y_gyro = event.values[1];
+                last_z_gyro = event.values[2];
+                saveNewSensorEntry();
+            }
         }
     };
 
@@ -248,13 +263,27 @@ public class SensorRecorder {
         }
         public void onSensorChanged(SensorEvent event) {
 
-            last_x_mag = event.values[0];
-            last_y_mag = event.values[1];
-            last_z_mag = event.values[2];
-
-            //saveNewSensorEntry();
+            float[] oldValues = new float[] {
+                    last_x_mag,
+                    last_y_mag,
+                    last_z_mag
+            };
+            if (checkForNonNoiseValues(oldValues, event.values)) {
+                last_x_mag = event.values[0];
+                last_y_mag = event.values[1];
+                last_z_mag = event.values[2];
+                saveNewSensorEntry();
+            }
         }
     };
+
+    private boolean checkForNonNoiseValues(float[] oldValues, float[] newValues) {
+        for (int i = 0; i < 3 ; i++) {
+            if ( Math.abs(oldValues[i] - newValues[i]) < SENSOR_NOISE_THRESHOLD )
+                return false;
+        }
+        return true;
+    }
 
     // === Listeners ENDS === //
 

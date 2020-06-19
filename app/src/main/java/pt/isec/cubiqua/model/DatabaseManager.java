@@ -25,7 +25,6 @@ public class DatabaseManager {
 
     private void connect() {
 
-
         String _address = sharedPreferencesManager.getServerDatabaseAddress();
         String _dbName = sharedPreferencesManager.getServerDatabaseName();
         String _username = sharedPreferencesManager.getServerDatabaseUsername();
