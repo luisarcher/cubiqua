@@ -22,31 +22,73 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Date;
+import java.util.List;
 import java.util.Vector;
 
+import pt.isec.cubiqua.recognition.WekaDataProcessor;
 import weka.core.Instances;
 import weka.core.converters.ArffSaver;
 import weka.core.converters.CSVLoader;
 
 import static com.jcraft.jsch.ChannelSftp.SSH_FX_NO_SUCH_FILE;
+import static pt.isec.cubiqua.recognition.Consts.FFT_N_READS;
 
-public class FileManager {
+public class FileManagerV2 {
 
     private Context context;
 
-    private static String FILENAME = "sensor_data";
+    private static String FILENAME = "sensor_data_v2";
     private static String FILE_EXTENSION_CSV = ".csv";
     private static String FILE_EXTENSION_ARFF = ".arff";
 
     SharedPreferencesManager sharedPreferencesManager;
 
-    public FileManager(Context context){
+    public FileManagerV2(Context context){
         this.context = context;
         this.sharedPreferencesManager = new SharedPreferencesManager(this.context);
     }
 
-    private String getFileHeader() {
-        return "session_id,latitude,longitude,altitude,instante,x_acc,y_acc,z_acc,x_gyro,y_gyro,z_gyro,x_mag,y_mag,z_mag,activity,indoor\n";
+    public String generateCSVHeaderRow(int numAttributes) {
+        StringBuilder _out = new StringBuilder();
+        for (int i = 1; i <= numAttributes ; i++){
+            _out.append("acc").append(i).append(",");
+            _out.append("gyro").append(i).append(",");
+        }
+        _out.append("tag");
+        return _out.toString();
+    }
+
+    public void saveCurrentFeatures(List<SensorStamp> bufferedData) {
+
+        WekaDataProcessor wekaDataProcessor = new WekaDataProcessor();
+
+        if (bufferedData.size() >= FFT_N_READS) {
+
+            // Simulate a FFT_N_READS window
+            for (int i = 0; i < bufferedData.size()-FFT_N_READS ; i++  ){
+                List<SensorStamp> view = bufferedData.subList(i, i+FFT_N_READS);
+                wekaDataProcessor.execDataAnalysis(view);
+            }
+
+            if (wekaDataProcessor.getAllTimeAccFFTData().size()
+                    == wekaDataProcessor.getAllTimeGyroFFTData().size()) {
+
+                StringBuilder _out = new StringBuilder();
+                int len = wekaDataProcessor.getAllTimeAccFFTData().size();
+
+                for (int i = 0; i < len; i++) {
+                    for (int j = 0; j < FFT_N_READS; j++){
+                        _out.append(wekaDataProcessor.getAllTimeAccFFTData().get(i)[j]).append(",");
+                        _out.append(wekaDataProcessor.getAllTimeGyroFFTData().get(i)[j]).append(",");
+                    }
+                    _out.append(bufferedData.get(0).getTag());
+
+                    if (i < len-1) _out.append("\n");
+                }
+                this.saveFileAsync(_out.toString());
+                wekaDataProcessor.clearAllData();
+            }
+        }
     }
 
     public void saveFile(String data){
@@ -67,7 +109,9 @@ public class FileManager {
             mExternalStorageAvailable = mExternalStorageWriteable = false;
         }
         if ( mExternalStorageAvailable && mExternalStorageWriteable ){
-            File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), FILENAME + FILE_EXTENSION_CSV);
+            File file = new File(Environment.getExternalStoragePublicDirectory(
+                    Environment.DIRECTORY_DCIM), FILENAME + FILE_EXTENSION_CSV
+            );
             boolean fileExists = file.exists();
 
             BufferedWriter bw;
@@ -75,7 +119,8 @@ public class FileManager {
                 bw = new BufferedWriter(new FileWriter(file, true));
                 if (!fileExists) {
                     //bw = new BufferedWriter(new FileWriter(file, false));
-                    bw.write(getFileHeader());
+                    bw.write(generateCSVHeaderRow(FFT_N_READS));
+                    bw.newLine();
                 } else {
 
                 }
@@ -95,7 +140,9 @@ public class FileManager {
     }
 
     public void deleteFile() {
-        File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), FILENAME + FILE_EXTENSION_CSV);
+        File file = new File(Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_DCIM), FILENAME + FILE_EXTENSION_CSV
+        );
 
         if(file.delete()) {
             Log.d("FileManager - deleteFile()","File deleted successfully");
@@ -119,7 +166,7 @@ public class FileManager {
             saver.setDestination(new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),file_name + FILE_EXTENSION_ARFF));
             saver.writeBatch();
 
-            Log.d(FileManager.class.getName(),"ARFF File saved!");
+            Log.d(FileManagerV2.class.getName(),"ARFF File saved!");
 
         }
         catch (FileNotFoundException e) {
@@ -142,10 +189,10 @@ public class FileManager {
 
         private final Context context;
         private ProgressDialog progress;
-        private FileManager classRef;
+        private FileManagerV2 classRef;
 
 
-        LongOperationSend(Context c, FileManager ref){
+        LongOperationSend(Context c, FileManagerV2 ref){
             this.context = c;
             this.classRef = ref;
         }
@@ -237,10 +284,10 @@ public class FileManager {
 
         private Context context;
         private ProgressDialog progress;
-        private FileManager classRef;
+        private FileManagerV2 classRef;
         private String data;
 
-        LongOperationSave(Context c, FileManager ref, String data) {
+        LongOperationSave(Context c, FileManagerV2 ref, String data) {
             this.context = c;
             this.classRef = ref;
             this.data = data;

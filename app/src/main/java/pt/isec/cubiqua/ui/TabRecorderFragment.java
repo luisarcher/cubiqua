@@ -135,7 +135,7 @@ public class TabRecorderFragment extends Fragment {
                     break;
                 case R.id.rad_lay:
                     if (checked)
-                        selectedActivity = "OTHER";
+                        selectedActivity = "LAY";
                     break;
             }
         }

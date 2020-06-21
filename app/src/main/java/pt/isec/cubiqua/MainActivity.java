@@ -19,12 +19,13 @@ import com.google.android.material.tabs.TabLayout;
 
 import pt.isec.cubiqua.model.DatabaseManager;
 import pt.isec.cubiqua.model.FileManager;
+import pt.isec.cubiqua.model.FileManagerV2;
 import pt.isec.cubiqua.model.SensorRecorder;
 import pt.isec.cubiqua.model.SharedPreferencesManager;
+import pt.isec.cubiqua.recognition.WekaDataProcessor;
 import pt.isec.cubiqua.ui.IController;
 import pt.isec.cubiqua.ui.PageAdapter;
 import pt.isec.cubiqua.ui.TabMonitorFragment;
-import pt.isec.cubiqua.recognition.WekaDataProcessor;
 
 public class MainActivity extends AppCompatActivity implements IController {
 
@@ -41,6 +42,7 @@ public class MainActivity extends AppCompatActivity implements IController {
 
     private SensorRecorder sensorRecorder;
     private FileManager fileManager;
+    private FileManagerV2 fileManagerV2;
     private DatabaseManager databaseManager;
     private SharedPreferencesManager sharedPreferencesManager;
 
@@ -93,6 +95,7 @@ public class MainActivity extends AppCompatActivity implements IController {
 
         this.sensorRecorder = new SensorRecorder(this);
         this.fileManager = new FileManager(this);
+        this.fileManagerV2 = new FileManagerV2(this);
         this.databaseManager = new DatabaseManager(this);
 
         this.requestStoragePermission();
@@ -229,7 +232,8 @@ public class MainActivity extends AppCompatActivity implements IController {
         _out.append(this.sensorRecorder.getEntries().get(
                 this.sensorRecorder.getEntries().size()-1).toString()
         );
-        fileManager.saveFileAsync(_out.toString());
+        //fileManager.saveFileAsync(_out.toString());
+        fileManagerV2.saveCurrentFeatures(this.sensorRecorder.getEntries());
         this.sensorRecorder.clearEntries();
 
         if (this.sharedPreferencesManager.isDBSync()) {
