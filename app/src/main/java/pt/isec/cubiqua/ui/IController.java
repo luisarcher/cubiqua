@@ -9,4 +9,5 @@ public interface IController {
     boolean isActivitySelected();
     boolean isRecording();
     void setIsActivitySelected(boolean isSelected);
+    void setupAutomaticMode();
 }

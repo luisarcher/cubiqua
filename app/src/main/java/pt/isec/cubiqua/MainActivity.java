@@ -24,6 +24,7 @@ import pt.isec.cubiqua.model.SharedPreferencesManager;
 import pt.isec.cubiqua.ui.IController;
 import pt.isec.cubiqua.ui.PageAdapter;
 import pt.isec.cubiqua.ui.TabMonitorFragment;
+import pt.isec.cubiqua.recognition.WekaDataProcessor;
 
 public class MainActivity extends AppCompatActivity implements IController {
 
@@ -47,6 +48,8 @@ public class MainActivity extends AppCompatActivity implements IController {
     // I believe we can store the fragment state instead
     private boolean isRecording;
     private boolean isActivitySelected;
+
+    private WekaDataProcessor wekaDataProcessor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,7 +91,7 @@ public class MainActivity extends AppCompatActivity implements IController {
 
         this.sharedPreferencesManager = new SharedPreferencesManager(this);
 
-        this.sensorRecorder = new SensorRecorder(this, null);
+        this.sensorRecorder = new SensorRecorder(this);
         this.fileManager = new FileManager(this);
         this.databaseManager = new DatabaseManager(this);
 
@@ -99,11 +102,20 @@ public class MainActivity extends AppCompatActivity implements IController {
         //SharedPreferences thisSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this /* Activity context */);
         //Boolean sync = thisSharedPreferences.getBoolean("db_sync", false);
         //Toast.makeText(getApplicationContext(), sync.toString(), Toast.LENGTH_LONG).show();
-
     }
 
     public void registerMonitor(TabMonitorFragment m) {
-        this.sensorRecorder.setListener(m);
+        this.sensorRecorder.addListener(m);
+    }
+
+    public void setupAutomaticMode() {
+        this.wekaDataProcessor = new WekaDataProcessor();
+
+        // Give WekaDataProcessor access to sensor recordings
+        this.wekaDataProcessor.setSensorRecorder(this.sensorRecorder);
+
+        // Setup WekaDataProcessor as listener for new sensor data
+        this.sensorRecorder.addListener(wekaDataProcessor);
     }
 
     public MainActivity getInstance() {

@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
@@ -139,4 +140,17 @@ public class TabRecorderFragment extends Fragment {
             }
         }
     };
+
+    public void onCheckboxClicked(View view) {
+        // Is the view now checked?
+        boolean checked = ((CheckBox) view).isChecked();
+
+        // Check which checkbox was clicked
+        if (view.getId() == R.id.chkAutomatic) {
+            if (checked)
+                mainActivity.setupAutomaticMode();
+                //else
+            // Unset automatic mode by removing listener
+        }
+    }
 }

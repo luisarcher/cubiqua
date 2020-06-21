@@ -42,10 +42,15 @@ public class SensorRecorder {
     private static final long LOCATION_REQUEST_MINDISTANCE = 10;  /* 10 METERS */
     private static final int LOCATION_REQUEST_MINTIME = 5 * 1000; /* 5 sec */
     protected static final int REQUEST_CHECK_SETTINGS = 0x1;
-    public static final float SENSOR_NOISE_THRESHOLD = (float)0.05;
+
+    public static final float ACC_SENSOR_NOISE_THRESHOLD = (float)0.05;
+    public static final float MAG_SENSOR_NOISE_THRESHOLD = (float)0.05;
+    public static final float GYRO_SENSOR_NOISE_THRESHOLD = (float)0.01;
 
     private Context context;
-    private IOnNewSensorDataListener listener;
+    //private IOnNewSensorDataListener listener;
+    private List<IOnNewSensorDataListener> listeners;
+
 
     private SharedPreferencesManager sharedPreferencesManager;
 
@@ -79,9 +84,9 @@ public class SensorRecorder {
     private NetworkInfo wifiNetwork;
     private String sessionId;
 
-    public SensorRecorder(Context context, IOnNewSensorDataListener listener) {
+    public SensorRecorder(Context context) {
         this.context = context;
-        this.listener = listener;
+        this.listeners = new ArrayList<>();
 
         this.sharedPreferencesManager = new SharedPreferencesManager(this.context);
 
@@ -99,8 +104,16 @@ public class SensorRecorder {
 
     }
 
-    public void setListener(IOnNewSensorDataListener l) {
+    /*public void setListener(IOnNewSensorDataListener l) {
         this.listener = l;
+    }*/
+    public void addListener(IOnNewSensorDataListener listener){
+        this.listeners.add(listener);
+    }
+    private void notifyListeners() {
+        for (IOnNewSensorDataListener listener : listeners){
+            listener.onNewSensorData();
+        }
     }
 
     //@SuppressLint("MissingPermission")
@@ -161,6 +174,10 @@ public class SensorRecorder {
         if (lastLatitude == 0 || lastLongitude == 0)
             return;
 
+        // Wait for gyro initialisation
+        if (this.last_x_gyro == 0 || this.last_y_gyro == 0 || this.last_z_gyro == 0)
+            return;
+
         if (!dismissedProgressDialog){
             initialising.dismiss();
         }
@@ -173,8 +190,7 @@ public class SensorRecorder {
         stamp.setMagneticData(last_x_mag, last_y_mag, last_z_mag);
 
         entries.add(stamp);
-        // TODO
-        this.listener.onNewSensorData();
+        this.notifyListeners();
     }
 
     private String getSessId(){
@@ -207,7 +223,7 @@ public class SensorRecorder {
                     last_y_acc,
                     last_z_acc
             };
-            if (checkForNonNoiseValues(oldValues, acceleration)) {
+            if (checkForNonNoiseValues(oldValues, acceleration, ACC_SENSOR_NOISE_THRESHOLD)) {
                 last_x_acc = acceleration[0];
                 last_y_acc = acceleration[1];
                 last_z_acc = acceleration[2];
@@ -247,7 +263,7 @@ public class SensorRecorder {
                     last_y_gyro,
                     last_z_gyro
             };
-            if (checkForNonNoiseValues(oldValues, event.values)) {
+            if (checkForNonNoiseValues(oldValues, event.values, GYRO_SENSOR_NOISE_THRESHOLD)) {
                 last_x_gyro = event.values[0];
                 last_y_gyro = event.values[1];
                 last_z_gyro = event.values[2];
@@ -270,7 +286,7 @@ public class SensorRecorder {
                     last_y_mag,
                     last_z_mag
             };
-            if (checkForNonNoiseValues(oldValues, event.values)) {
+            if (checkForNonNoiseValues(oldValues, event.values, MAG_SENSOR_NOISE_THRESHOLD)) {
                 last_x_mag = event.values[0];
                 last_y_mag = event.values[1];
                 last_z_mag = event.values[2];
@@ -279,12 +295,12 @@ public class SensorRecorder {
         }
     };
 
-    private boolean checkForNonNoiseValues(float[] oldValues, float[] newValues) {
+    private boolean checkForNonNoiseValues(float[] oldValues, float[] newValues, float sensorNoiseThreshold) {
         for (int i = 0; i < 3 ; i++) {
-            if ( Math.abs(oldValues[i] - newValues[i]) < SENSOR_NOISE_THRESHOLD )
-                return false;
+            if ( Math.abs(oldValues[i] - newValues[i]) >= sensorNoiseThreshold )
+                return true;
         }
-        return true;
+        return false;
     }
 
     // === Listeners ENDS === //
