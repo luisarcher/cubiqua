@@ -17,7 +17,7 @@ import pt.isec.cubiqua.R;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class TabMonitorFragment extends Fragment implements IOnNewSensorDataListener{
+public class TabMonitorFragment extends Fragment implements IOnNewSensorDataListener, IOnNewMessageListener {
 
     // XML Elements
     private TextView txtNEntries;
@@ -55,11 +55,17 @@ public class TabMonitorFragment extends Fragment implements IOnNewSensorDataList
         this.txtMagnetometer = (TextView) getView().findViewById(R.id.txtMagnetometer);
 
         ((MainActivity)getActivity()).registerMonitor(this);
+        ((MainActivity)getActivity()).addMessageListener(this);
     }
 
     @Override
     public void onNewSensorData() {
         this.update();
+    }
+
+    @Override
+    public void onNewMessage(String message) {
+
     }
 
     public void update() {
@@ -74,6 +80,6 @@ public class TabMonitorFragment extends Fragment implements IOnNewSensorDataList
 
         // Populate other elements accordingly
 
-
     }
+
 }

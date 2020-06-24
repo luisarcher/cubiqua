@@ -21,7 +21,7 @@ public class ClassifyDatum {
 		classifyProgrammaticDatum(cls);
 	}*/
 	
-	private static void classifyProgrammaticDatum(Classifier cls) throws Exception {
+	/*private static void classifyProgrammaticDatum(Classifier cls) throws Exception {
 		// generate the instance programmatic
 		Instances testData = getInstance();
 
@@ -29,7 +29,7 @@ public class ClassifyDatum {
 		double pred = cls.classifyInstance(testData.instance(0));
 
 		System.out.print("Prediction was: " + pred);
-	}
+	}*/
 	
 	private static void classifyCsv(Classifier cls, String testSetPath) throws Exception {
 	

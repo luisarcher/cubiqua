@@ -35,6 +35,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-location:17.0.0'
     implementation 'com.jcraft:jsch:0.1.52'
     implementation files('libs/weka_3_7_13_mobile.jar')
+    //implementation files('libs/weka.jar')
 
     //implementation 'org.postgresql:postgresql:42.2.12'
     implementation 'postgresql:postgresql:9.1-901-1.jdbc4'

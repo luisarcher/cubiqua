@@ -25,13 +25,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.Vector;
 
+import pt.isec.cubiqua.recognition.WekaClassifier;
 import pt.isec.cubiqua.recognition.WekaDataProcessor;
 import weka.core.Instances;
 import weka.core.converters.ArffSaver;
 import weka.core.converters.CSVLoader;
 
 import static com.jcraft.jsch.ChannelSftp.SSH_FX_NO_SUCH_FILE;
-import static pt.isec.cubiqua.recognition.Consts.FFT_N_READS;
+import static pt.isec.cubiqua.Consts.FFT_N_READS;
 
 public class FileManagerV2 {
 
@@ -60,10 +61,8 @@ public class FileManagerV2 {
 
     public void saveCurrentFeatures(List<SensorStamp> bufferedData) {
 
-        WekaDataProcessor wekaDataProcessor = new WekaDataProcessor();
-
         if (bufferedData.size() >= FFT_N_READS) {
-
+            WekaDataProcessor wekaDataProcessor = new WekaDataProcessor();
             // Simulate a FFT_N_READS window
             for (int i = 0; i < bufferedData.size()-FFT_N_READS ; i++  ){
                 List<SensorStamp> view = bufferedData.subList(i, i+FFT_N_READS);
@@ -86,6 +85,13 @@ public class FileManagerV2 {
                     if (i < len-1) _out.append("\n");
                 }
                 this.saveFileAsync(_out.toString());
+
+                WekaClassifier wekaClassifier = new WekaClassifier();
+                wekaClassifier.bulkPredict(
+                        wekaDataProcessor.getAllTimeAccFFTData(),
+                        wekaDataProcessor.getAllTimeGyroFFTData()
+                );
+
                 wekaDataProcessor.clearAllData();
             }
         }

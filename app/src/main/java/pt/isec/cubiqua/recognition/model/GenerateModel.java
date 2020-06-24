@@ -16,7 +16,7 @@ public class GenerateModel {
 		
 	}*/
 
-  	private static void trainClassifier(String trainSetPath, String classifierSavePath) throws Exception {
+  	public static void trainClassifier(String trainSetPath, String classifierSavePath) throws Exception {
   	
 	  	// load the csv file
 	  	CSVLoader loader = new CSVLoader();
@@ -33,7 +33,7 @@ public class GenerateModel {
 	  	// train the classifier on your data.
 	  	cls.buildClassifier(trainData);
 	  
-	    	// write your trained model to a file
-	    	weka.core.SerializationHelper.write(classifierSavePath, cls);
+		// write your trained model to a file
+		weka.core.SerializationHelper.write(classifierSavePath, cls);
   	}
 }

@@ -17,6 +17,9 @@ import androidx.viewpager.widget.ViewPager;
 import com.google.android.material.tabs.TabItem;
 import com.google.android.material.tabs.TabLayout;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import pt.isec.cubiqua.model.DatabaseManager;
 import pt.isec.cubiqua.model.FileManager;
 import pt.isec.cubiqua.model.FileManagerV2;
@@ -24,6 +27,7 @@ import pt.isec.cubiqua.model.SensorRecorder;
 import pt.isec.cubiqua.model.SharedPreferencesManager;
 import pt.isec.cubiqua.recognition.WekaDataProcessor;
 import pt.isec.cubiqua.ui.IController;
+import pt.isec.cubiqua.ui.IOnNewMessageListener;
 import pt.isec.cubiqua.ui.PageAdapter;
 import pt.isec.cubiqua.ui.TabMonitorFragment;
 
@@ -52,6 +56,9 @@ public class MainActivity extends AppCompatActivity implements IController {
     private boolean isActivitySelected;
 
     private WekaDataProcessor wekaDataProcessor;
+
+    private List<String> messageList;
+    private List<IOnNewMessageListener> messageListeners;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,6 +109,9 @@ public class MainActivity extends AppCompatActivity implements IController {
         this.isRecording = false;
         this.isActivitySelected = false;
 
+        this.messageList = new ArrayList<>();
+        this.messageListeners = new ArrayList<>();
+
         //SharedPreferences thisSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this /* Activity context */);
         //Boolean sync = thisSharedPreferences.getBoolean("db_sync", false);
         //Toast.makeText(getApplicationContext(), sync.toString(), Toast.LENGTH_LONG).show();
@@ -109,6 +119,14 @@ public class MainActivity extends AppCompatActivity implements IController {
 
     public void registerMonitor(TabMonitorFragment m) {
         this.sensorRecorder.addListener(m);
+    }
+
+    public void addMessageListener(IOnNewMessageListener listener) {
+        this.messageListeners.add(listener);
+    }
+
+    public void addMessage(String message) {
+        this.messageList.add(message);
     }
 
     public void setupAutomaticMode() {
@@ -232,7 +250,7 @@ public class MainActivity extends AppCompatActivity implements IController {
         _out.append(this.sensorRecorder.getEntries().get(
                 this.sensorRecorder.getEntries().size()-1).toString()
         );
-        //fileManager.saveFileAsync(_out.toString());
+        fileManager.saveFileAsync(_out.toString());
         fileManagerV2.saveCurrentFeatures(this.sensorRecorder.getEntries());
         this.sensorRecorder.clearEntries();
 

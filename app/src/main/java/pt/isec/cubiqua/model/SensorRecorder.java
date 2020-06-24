@@ -43,16 +43,15 @@ public class SensorRecorder {
     private static final int LOCATION_REQUEST_MINTIME = 5 * 1000; /* 5 sec */
     protected static final int REQUEST_CHECK_SETTINGS = 0x1;
 
-    public static final float ACC_SENSOR_NOISE_THRESHOLD = (float)0.05;
-    public static final float MAG_SENSOR_NOISE_THRESHOLD = (float)0.05;
-    public static final float GYRO_SENSOR_NOISE_THRESHOLD = (float)0.01;
+    public static final float ACC_SENSOR_NOISE_THRESHOLD = (float)0.06;
+    public static final float GYRO_SENSOR_NOISE_THRESHOLD = (float)0.03;
+    public static final float MAG_SENSOR_NOISE_THRESHOLD = (float)0.08;
 
     private Context context;
     //private IOnNewSensorDataListener listener;
     private List<IOnNewSensorDataListener> listeners;
 
-
-    private SharedPreferencesManager sharedPreferencesManager;
+    //private SharedPreferencesManager sharedPreferencesManager;
 
     private FusedLocationProviderClient fusedLocationClient;
 
@@ -88,7 +87,7 @@ public class SensorRecorder {
         this.context = context;
         this.listeners = new ArrayList<>();
 
-        this.sharedPreferencesManager = new SharedPreferencesManager(this.context);
+        //this.sharedPreferencesManager = new SharedPreferencesManager(this.context);
 
         this.fusedLocationClient = LocationServices.getFusedLocationProviderClient(this.context);
         this.sensorManager = (SensorManager) this.context.getSystemService(Context.SENSOR_SERVICE);
@@ -174,6 +173,8 @@ public class SensorRecorder {
         if (lastLatitude == 0 || lastLongitude == 0)
             return;
 
+        initialising.setMessage("Awaiting movement...");
+
         // Wait for gyro initialisation
         if (this.last_x_gyro == 0 || this.last_y_gyro == 0 || this.last_z_gyro == 0)
             return;
@@ -241,7 +242,7 @@ public class SensorRecorder {
             lastLatitude = location.getLatitude();
             lastLongitude = location.getLongitude();
             lastAltitude = location.getAltitude();
-
+            //saveNewSensorEntry();
             Log.d(SensorRecorder.class.getName(),"onLocationChanged()");
         } else {
             // Indoor??
@@ -290,7 +291,7 @@ public class SensorRecorder {
                 last_x_mag = event.values[0];
                 last_y_mag = event.values[1];
                 last_z_mag = event.values[2];
-                saveNewSensorEntry();
+                //saveNewSensorEntry();
             }
         }
     };

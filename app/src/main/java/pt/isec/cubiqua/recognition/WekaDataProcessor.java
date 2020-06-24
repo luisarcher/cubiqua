@@ -8,18 +8,15 @@ import pt.isec.cubiqua.model.SensorRecorder;
 import pt.isec.cubiqua.model.SensorStamp;
 import pt.isec.cubiqua.ui.IOnNewSensorDataListener;
 
-import static pt.isec.cubiqua.recognition.Consts.FFT_N_READS;
+import static pt.isec.cubiqua.Consts.FFT_N_READS;
 
 public class WekaDataProcessor implements  IOnNewSensorDataListener{
 
     //TODO: Since this is done after every sensor read, this must be an async task.
     //The sensor reads should be freed
 
-    private List<Double> accAngularVelocityData;
-    private List<Double> gyroAngularVelocityData;
-
-    private double[] accFFTData;
-    private double[] gyroFFTData;
+    //private double[] accFFTData;
+    //private double[] gyroFFTData;
 
     private List<double[]> allTimeAccFFTData;
     private List<double[]> allTimeGyroFFTData;
@@ -31,11 +28,9 @@ public class WekaDataProcessor implements  IOnNewSensorDataListener{
     private FFT fftObj;
 
     public WekaDataProcessor(){
-        accAngularVelocityData = new ArrayList<>();
-        gyroAngularVelocityData = new ArrayList<>();
 
-        allTimeAccFFTData = new ArrayList<>();
-        allTimeGyroFFTData = new ArrayList<>();
+        allTimeAccFFTData = new ArrayList<double[]>();
+        allTimeGyroFFTData = new ArrayList<double[]>();
 
         /*accFFTData = new ArrayList<>();
         gyroFFTData = new ArrayList<>();*/
@@ -56,57 +51,56 @@ public class WekaDataProcessor implements  IOnNewSensorDataListener{
             return;
 
         List<SensorStamp> bufferData = new ArrayList<>(
-                this.sensorRecorderPtr.getEntries().subList(lenEntries-FFT_N_READS, FFT_N_READS-1)
+                this.sensorRecorderPtr.getEntries().subList(lenEntries-FFT_N_READS, FFT_N_READS)
         );
 
         execDataAnalysis(bufferData);
-
-        // create arff
-        // use weka to predict - use new class here
     }
 
     public void execDataAnalysis(List<SensorStamp> bufferData){
 
         // Calc angular velocity
+        List<Double> accAngularVelocityData = new ArrayList<>();
+        List<Double> gyroAngularVelocityData = new ArrayList<>();
+        String currentHumanActivity = "";
+
         for (SensorStamp stamp : bufferData) {
-            this.accAngularVelocityData.add(calcAngularVelocity(
+
+            if ("".equals(currentHumanActivity)){
+                currentHumanActivity = stamp.getTag();
+            }
+
+            if (!stamp.getTag().equals(currentHumanActivity)) {
+                // If the next stamp
+                return;
+            }
+
+            accAngularVelocityData.add(calcAngularVelocity(
                     stamp.getX_acc(), stamp.getY_acc(), stamp.getZ_acc()
             ));
-            this.gyroAngularVelocityData.add(calcAngularVelocity(
+            gyroAngularVelocityData.add(calcAngularVelocity(
                     stamp.getX_gyro(), stamp.getY_gyro(), stamp.getZ_gyro()
             ));
         }
 
         // Calc FFT
-        Double[] _arrAcc = new Double[accAngularVelocityData.size()];
-        _arrAcc = accAngularVelocityData.toArray(_arrAcc);
-        double[] re_acc = toPrimitive(_arrAcc);
+        double[] re_acc = new double[FFT_N_READS];
         double[] im_acc = new double[FFT_N_READS];
+        for (int i = 0; i < re_acc.length; i++)
+            re_acc[i] = accAngularVelocityData.get(i);
         fftObj.fft(re_acc,im_acc);
+        this.allTimeAccFFTData.add(Arrays.copyOf(re_acc, re_acc.length));
 
-        Double[] _arrGyro = new Double[gyroAngularVelocityData.size()];
-        double[] re_gyro = toPrimitive(gyroAngularVelocityData.toArray(_arrGyro));
+        double[] re_gyro = new double[FFT_N_READS];
         double[] im_gyro = new double[FFT_N_READS];
+        for (int i = 0; i < re_gyro.length; i++)
+            re_gyro[i] = gyroAngularVelocityData.get(i);
         fftObj.fft(re_gyro, im_gyro);
-
-        this.accFFTData = re_acc;
-        this.gyroFFTData = re_gyro;
-
-        this.allTimeAccFFTData.add(Arrays.copyOf(this.accFFTData, this.accFFTData.length));
-        this.allTimeGyroFFTData.add(Arrays.copyOf(this.gyroFFTData, this.gyroFFTData.length));
-
+        this.allTimeGyroFFTData.add(Arrays.copyOf(re_gyro, re_gyro.length));
     }
 
     private double calcAngularVelocity(float x, float y, float z){
-        return (float) Math.sqrt(Math.pow(x,2) + Math.pow(y,2) + Math.pow(z,2));
-    }
-
-    public double[] getAccFFTData() {
-        return accFFTData;
-    }
-
-    public double[] getGyroFFTData() {
-        return gyroFFTData;
+        return Math.sqrt(Math.pow(x,2) + Math.pow(y,2) + Math.pow(z,2));
     }
 
     public List<double[]> getAllTimeAccFFTData() {
@@ -118,24 +112,8 @@ public class WekaDataProcessor implements  IOnNewSensorDataListener{
     }
 
     public void clearAllData() {
-        accAngularVelocityData.clear();
-        gyroAngularVelocityData.clear();
         allTimeAccFFTData.clear();
         allTimeGyroFFTData.clear();
-    }
-
-    /* HELPERS */
-    private static double[] toPrimitive(Double[] array) {
-        if (array == null) {
-            return null;
-        } else if (array.length == 0) {
-            return new double[] {};
-        }
-        final double[] result = new double[array.length];
-        for (int i = 0; i < array.length; i++) {
-            result[i] = array[i].doubleValue();
-        }
-        return result;
     }
 
 }

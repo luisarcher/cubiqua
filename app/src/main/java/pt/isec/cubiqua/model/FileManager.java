@@ -90,13 +90,12 @@ public class FileManager {
             //Nao esquecer:  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
             // Converter ficheiro criado para Arff
-            this.convertCSVtoArff(FILENAME);
+            //this.convertCSVtoArff(FILENAME);
         }
     }
 
     public void deleteFile() {
         File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), FILENAME + FILE_EXTENSION_CSV);
-
         if(file.delete()) {
             Log.d("FileManager - deleteFile()","File deleted successfully");
         } else {

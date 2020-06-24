@@ -56,5 +56,6 @@
     <string name="pref_db_server_address">Database Address</string>
     <string name="pref_db_server_username">Database Username</string>
     <string name="pref_db_server_password">Database Password</string>
+    <string name="chkBoxLabel">Auto Detect</string>
 
 </resources>
