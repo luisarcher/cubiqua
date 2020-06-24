@@ -6,6 +6,8 @@ import weka.classifiers.trees.RandomForest;
 import weka.core.Instances;
 import weka.core.converters.CSVLoader;
 
+import static pt.isec.cubiqua.Consts.FFT_N_READS;
+
 public class GenerateModel {
 
 	/*public static void main(String[] args) throws Exception {
@@ -26,7 +28,7 @@ public class GenerateModel {
 	  	Instances trainData = loader.getDataSet();
 	  	
 	  	// set the class index. In this case the first colum indicates the class
-	  	trainData.setClassIndex(0);
+	  	trainData.setClassIndex(FFT_N_READS * 2);
 	  	
 	  	// create a new Random Forest Classifier
 	  	Classifier cls = new RandomForest();
