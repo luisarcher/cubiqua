@@ -28,8 +28,8 @@ import pt.isec.cubiqua.model.SharedPreferencesManager;
 import pt.isec.cubiqua.recognition.WekaDataProcessor;
 import pt.isec.cubiqua.ui.IController;
 import pt.isec.cubiqua.ui.IOnNewMessageListener;
+import pt.isec.cubiqua.ui.IOnNewSensorDataListener;
 import pt.isec.cubiqua.ui.PageAdapter;
-import pt.isec.cubiqua.ui.TabMonitorFragment;
 
 public class MainActivity extends AppCompatActivity implements IController {
 
@@ -117,8 +117,8 @@ public class MainActivity extends AppCompatActivity implements IController {
         //Toast.makeText(getApplicationContext(), sync.toString(), Toast.LENGTH_LONG).show();
     }
 
-    public void registerMonitor(TabMonitorFragment m) {
-        this.sensorRecorder.addListener(m);
+    public void registerMonitor(IOnNewSensorDataListener listener) {
+        this.sensorRecorder.addListener(listener);
     }
 
     public void addMessageListener(IOnNewMessageListener listener) {
@@ -257,6 +257,11 @@ public class MainActivity extends AppCompatActivity implements IController {
         if (this.sharedPreferencesManager.isDBSync()) {
             databaseManager.insertFromEntryList(this.sensorRecorder.getEntries());
         }
+    }
+
+    @Override
+    public void convertToARFF() {
+        this.fileManagerV2.convertCSVtoArffAsync();
     }
 
     @Override

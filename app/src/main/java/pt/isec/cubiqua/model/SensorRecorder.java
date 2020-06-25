@@ -36,16 +36,16 @@ import java.util.List;
 
 import pt.isec.cubiqua.ui.IOnNewSensorDataListener;
 
+import static pt.isec.cubiqua.Consts.ACC_SENSOR_NOISE_THRESHOLD;
+import static pt.isec.cubiqua.Consts.GYRO_SENSOR_NOISE_THRESHOLD;
+import static pt.isec.cubiqua.Consts.MAG_SENSOR_NOISE_THRESHOLD;
+
 public class SensorRecorder {
 
     private static final int LOCATION_REQUEST_CODE = 1000;
     private static final long LOCATION_REQUEST_MINDISTANCE = 10;  /* 10 METERS */
     private static final int LOCATION_REQUEST_MINTIME = 5 * 1000; /* 5 sec */
     protected static final int REQUEST_CHECK_SETTINGS = 0x1;
-
-    public static final float ACC_SENSOR_NOISE_THRESHOLD = (float)0.06;
-    public static final float GYRO_SENSOR_NOISE_THRESHOLD = (float)0.03;
-    public static final float MAG_SENSOR_NOISE_THRESHOLD = (float)0.08;
 
     private Context context;
     //private IOnNewSensorDataListener listener;

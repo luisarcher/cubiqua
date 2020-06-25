@@ -16,6 +16,7 @@ import weka.core.Instances;
 import static pt.isec.cubiqua.Consts.FFT_N_READS;
 import static pt.isec.cubiqua.Consts.JUMP;
 import static pt.isec.cubiqua.Consts.LAY;
+import static pt.isec.cubiqua.Consts.SITTING;
 import static pt.isec.cubiqua.Consts.SQUAT;
 import static pt.isec.cubiqua.Consts.WALK;
 import static pt.isec.cubiqua.Consts.WEKA_DIR;
@@ -23,11 +24,10 @@ import static pt.isec.cubiqua.Consts.WEKA_MODEL_FILENAME;
 
 public class WekaClassifier {
 
-    public WekaClassifier() {
+    public WekaClassifier() {}
 
-    }
-
-    public void bulkPredict(List<double[]> accAllTimeData, List<double[]> gyroAllTimeData){
+    public void bulkPredict(List<double[]> accAllTimeData, List<double[]> gyroAllTimeData,
+                            List<Double> accMaxValues, List<Double> gyroMaxValues){
 
         /* Generate Model */
         String trainingDataPath = "weka_model.csv";
@@ -45,21 +45,24 @@ public class WekaClassifier {
         TupleResultAccuracy mostAccurate = new TupleResultAccuracy();
         for (int i = 0; i < accAllTimeData.size(); i++) {
             TupleResultAccuracy resultTuple = predictActivity(
-                    accAllTimeData.get(i), gyroAllTimeData.get(i)
+                    accAllTimeData.get(i), gyroAllTimeData.get(i),
+                    accMaxValues.get(i), gyroMaxValues.get(i)
             );
             if (resultTuple.getAccuracy() > mostAccurate.getAccuracy()) {
-                mostAccurate = resultTuple;
+                mostAccurate.setResult(resultTuple.getResult());
+                mostAccurate.setAccuracy(resultTuple.getAccuracy());
             }
         }
         Log.d(WekaClassifier.class.getName(), "Predicted Activity: " + mostAccurate.getResult() + " ACC: " + mostAccurate.getAccuracy());
 
     }
 
-    public TupleResultAccuracy predictActivity(double[] accData, double[] gyroData){
+    public TupleResultAccuracy predictActivity(double[] accData, double[] gyroData,
+                                               Double accMax, Double gyroMax){
         Classifier classifier = getClassifier();
 
         Instances instances = getInstances(
-                (ArrayList<Attribute>) getAttributeList(), accData, gyroData
+                (ArrayList<Attribute>) getAttributeList(), accData, gyroData, accMax, gyroMax
         );
 
         double result = 0;
@@ -81,7 +84,8 @@ public class WekaClassifier {
 
     }
 
-    private Instances getInstances(ArrayList<Attribute> atts, double[] accData, double[] gyroData) {
+    private Instances getInstances(ArrayList<Attribute> atts, double[] accData, double[] gyroData,
+                                   Double accMax, Double gyroMax) {
         // create a new Instances Object and a double array containing the values
         Instances dataRaw = new Instances("TestInstances", atts, 0);
 
@@ -91,11 +95,16 @@ public class WekaClassifier {
             inst.setValue(dataRaw.attribute("acc" + (i+1)), accData[i]);
         for(int i = 0; i < FFT_N_READS; i++)
             inst.setValue(dataRaw.attribute("gyro" + (i+1)), gyroData[i]);
+
+        inst.setValue(dataRaw.attribute("acc_max"), accMax);
+        inst.setValue(dataRaw.attribute("gyro_max"), gyroMax);
+
         inst.setValue(dataRaw.attribute("tag"), 0);
         inst.setDataset(dataRaw);
 
         dataRaw.add(inst);
         dataRaw.setClassIndex(dataRaw.numAttributes() - 1);
+        Log.d("Instances", "Class Index: " + (dataRaw.numAttributes() - 1));
 
         // return tha Instance packed in an instances object
         return dataRaw;
@@ -107,6 +116,9 @@ public class WekaClassifier {
             attributeList.add(new Attribute("acc" + i));
         for(int i = 1; i <= FFT_N_READS; i++)
             attributeList.add(new Attribute("gyro" + i));
+
+        attributeList.add(new Attribute("acc_max"));
+        attributeList.add(new Attribute("gyro_max"));
 
         attributeList.add(new Attribute("tag", this.getActivities()));
 
@@ -128,7 +140,7 @@ public class WekaClassifier {
         List<String> activities = new ArrayList<>();
         activities.add(WALK); activities.add(JUMP);
         activities.add(SQUAT); activities.add(LAY);
-        //activities.add(SITTING);
+        activities.add(SITTING);
         return activities;
     }
 

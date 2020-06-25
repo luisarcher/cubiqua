@@ -103,6 +103,13 @@ public class TabRecorderFragment extends Fragment {
                 ((RadioButton)o).setOnClickListener(onRadioButtonClickedListener);
             }
         }
+
+        final Button convertToARFFButton = (Button) getView().findViewById(R.id.btnArff);
+        convertToARFFButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                mainActivity.convertToARFF();
+            }
+        });
     }
 
     private View.OnClickListener onRadioButtonClickedListener = new View.OnClickListener() {

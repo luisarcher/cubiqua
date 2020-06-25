@@ -30,7 +30,7 @@ public class TabMonitorFragment extends Fragment implements IOnNewSensorDataList
     private TextView txtRecordStatus;
     private TextView txtMagnetometer;
 
-    private String _fileData;
+    private IController mainActivity;
 
     public TabMonitorFragment() {
         // Required empty public constructor
@@ -54,8 +54,10 @@ public class TabMonitorFragment extends Fragment implements IOnNewSensorDataList
         //this.txtDeviceList = (TextView) getView().findViewById(R.id.txtDeviceList);
         this.txtMagnetometer = (TextView) getView().findViewById(R.id.txtMagnetometer);
 
-        ((MainActivity)getActivity()).registerMonitor(this);
-        ((MainActivity)getActivity()).addMessageListener(this);
+        this.mainActivity = ((MainActivity)getActivity()).getInstance();
+
+        this.mainActivity.registerMonitor(this);
+        this.mainActivity.addMessageListener(this);
     }
 
     @Override
@@ -77,7 +79,6 @@ public class TabMonitorFragment extends Fragment implements IOnNewSensorDataList
 
         String nEntries = "" + ((MainActivity)getActivity()).getCurrentEntryCount();
         this.txtNEntries.setText(nEntries);
-
         // Populate other elements accordingly
 
     }

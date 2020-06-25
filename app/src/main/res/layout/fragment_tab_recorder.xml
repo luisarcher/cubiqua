@@ -87,6 +87,12 @@
                 android:text="@string/chkBoxLabel"
                 android:onClick="onCheckboxClicked"/>
 
+            <Button
+                android:id="@+id/btnArff"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Convert to ARFF" />
+
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

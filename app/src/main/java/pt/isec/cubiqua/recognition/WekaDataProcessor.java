@@ -20,6 +20,8 @@ public class WekaDataProcessor implements  IOnNewSensorDataListener{
 
     private List<double[]> allTimeAccFFTData;
     private List<double[]> allTimeGyroFFTData;
+    private List<Double> allTimeAccMax;
+    private List<Double> allTimeGyroMax;
 
     private SensorRecorder sensorRecorderPtr;
 
@@ -29,11 +31,10 @@ public class WekaDataProcessor implements  IOnNewSensorDataListener{
 
     public WekaDataProcessor(){
 
-        allTimeAccFFTData = new ArrayList<double[]>();
-        allTimeGyroFFTData = new ArrayList<double[]>();
-
-        /*accFFTData = new ArrayList<>();
-        gyroFFTData = new ArrayList<>();*/
+        this.allTimeAccFFTData = new ArrayList<double[]>();
+        this.allTimeGyroFFTData = new ArrayList<double[]>();
+        this.allTimeAccMax = new ArrayList<>();
+        this.allTimeGyroMax = new ArrayList<>();
 
         fftObj = new FFT(FFT_N_READS);
     }
@@ -62,6 +63,10 @@ public class WekaDataProcessor implements  IOnNewSensorDataListener{
         // Calc angular velocity
         List<Double> accAngularVelocityData = new ArrayList<>();
         List<Double> gyroAngularVelocityData = new ArrayList<>();
+
+        Double accMaxAngularVel = null;
+        Double gyroMaxAngularVel = null;
+
         String currentHumanActivity = "";
 
         for (SensorStamp stamp : bufferData) {
@@ -75,12 +80,22 @@ public class WekaDataProcessor implements  IOnNewSensorDataListener{
                 return;
             }
 
-            accAngularVelocityData.add(calcAngularVelocity(
+            double currAccAngularVel = calcAngularVelocity(
                     stamp.getX_acc(), stamp.getY_acc(), stamp.getZ_acc()
-            ));
-            gyroAngularVelocityData.add(calcAngularVelocity(
+            );
+            double currGyroAngularVel = calcAngularVelocity(
                     stamp.getX_gyro(), stamp.getY_gyro(), stamp.getZ_gyro()
-            ));
+            );
+
+            if (accMaxAngularVel == null || accMaxAngularVel < currAccAngularVel) {
+                accMaxAngularVel = currAccAngularVel;
+            }
+            if (gyroMaxAngularVel == null || gyroMaxAngularVel < currGyroAngularVel) {
+                gyroMaxAngularVel = currGyroAngularVel;
+            }
+
+            accAngularVelocityData.add(currAccAngularVel);
+            gyroAngularVelocityData.add(currGyroAngularVel);
         }
 
         // Calc FFT
@@ -97,6 +112,11 @@ public class WekaDataProcessor implements  IOnNewSensorDataListener{
             re_gyro[i] = gyroAngularVelocityData.get(i);
         fftObj.fft(re_gyro, im_gyro);
         this.allTimeGyroFFTData.add(Arrays.copyOf(re_gyro, re_gyro.length));
+
+        this.allTimeAccMax.add(accMaxAngularVel);
+        this.allTimeGyroMax.add(gyroMaxAngularVel);
+
+
     }
 
     private double calcAngularVelocity(float x, float y, float z){
@@ -111,9 +131,19 @@ public class WekaDataProcessor implements  IOnNewSensorDataListener{
         return allTimeGyroFFTData;
     }
 
+    public List<Double> getAllTimeAccMax() {
+        return allTimeAccMax;
+    }
+
+    public List<Double> getAllTimeGyroMax() {
+        return allTimeGyroMax;
+    }
+
     public void clearAllData() {
         allTimeAccFFTData.clear();
         allTimeGyroFFTData.clear();
+        allTimeAccMax.clear();
+        allTimeGyroMax.clear();
     }
 
 }

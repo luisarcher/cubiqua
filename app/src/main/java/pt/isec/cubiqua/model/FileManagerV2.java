@@ -25,7 +25,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Vector;
 
-import pt.isec.cubiqua.recognition.WekaClassifier;
 import pt.isec.cubiqua.recognition.WekaDataProcessor;
 import weka.core.Instances;
 import weka.core.converters.ArffSaver;
@@ -38,7 +37,7 @@ public class FileManagerV2 {
 
     private Context context;
 
-    private static String FILENAME = "sensor_data_v2";
+    private static String FILENAME = "sensor_data_v3";
     private static String FILE_EXTENSION_CSV = ".csv";
     private static String FILE_EXTENSION_ARFF = ".arff";
 
@@ -55,6 +54,8 @@ public class FileManagerV2 {
             _out.append("acc").append(i).append(",");
             _out.append("gyro").append(i).append(",");
         }
+        _out.append("acc_max").append(",");
+        _out.append("gyro_max").append(",");
         _out.append("tag");
         return _out.toString();
     }
@@ -80,17 +81,21 @@ public class FileManagerV2 {
                         _out.append(wekaDataProcessor.getAllTimeAccFFTData().get(i)[j]).append(",");
                         _out.append(wekaDataProcessor.getAllTimeGyroFFTData().get(i)[j]).append(",");
                     }
+                    _out.append(wekaDataProcessor.getAllTimeAccMax().get(i)).append(",");
+                    _out.append(wekaDataProcessor.getAllTimeGyroMax().get(i)).append(",");
                     _out.append(bufferedData.get(0).getTag());
 
                     if (i < len-1) _out.append("\n");
                 }
                 this.saveFileAsync(_out.toString());
 
-                WekaClassifier wekaClassifier = new WekaClassifier();
+                /*WekaClassifier wekaClassifier = new WekaClassifier();
                 wekaClassifier.bulkPredict(
                         wekaDataProcessor.getAllTimeAccFFTData(),
-                        wekaDataProcessor.getAllTimeGyroFFTData()
-                );
+                        wekaDataProcessor.getAllTimeGyroFFTData(),
+                        wekaDataProcessor.getAllTimeAccMax(),
+                        wekaDataProcessor.getAllTimeGyroMax()
+                );*/
 
                 wekaDataProcessor.clearAllData();
             }
@@ -141,7 +146,10 @@ public class FileManagerV2 {
             //Nao esquecer:  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
             // Converter ficheiro criado para Arff
-            this.convertCSVtoArff(FILENAME);
+            //######################################
+            // //######################################
+            // //#################################################this.convertCSVtoArff(FILENAME);
+            //######################################
         }
     }
 
@@ -188,6 +196,10 @@ public class FileManagerV2 {
 
     public void saveFileAsync(String data) {
         new LongOperationSave(this.context, this, data).execute();
+    }
+
+    public void convertCSVtoArffAsync() {
+        new LongOperationConvertToARFF(this.context, this, FILENAME + FILE_EXTENSION_CSV).execute();
     }
 
     // Connecto to SSH and upload file | File Server
@@ -309,6 +321,38 @@ public class FileManagerV2 {
         @Override
         protected String doInBackground(Void... params) {
             this.classRef.saveFile(this.data);
+            return "ok";
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            Log.d("PostExecuted", result);
+            progress.dismiss();
+        }
+    }
+
+    // Save data Async (after pressing stop)
+    private static class LongOperationConvertToARFF extends AsyncTask<Void, Integer, String> {
+
+        private Context context;
+        private ProgressDialog progress;
+        private FileManagerV2 classRef;
+
+        LongOperationConvertToARFF(Context c, FileManagerV2 ref, String data) {
+            this.context = c;
+            this.classRef = ref;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            progress = new ProgressDialog(this.context);
+            progress.setMessage("Saving data...");
+            progress.show();
+        }
+
+        @Override
+        protected String doInBackground(Void... params) {
+            this.classRef.convertCSVtoArff(FILENAME);
             return "ok";
         }
 

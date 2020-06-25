@@ -28,7 +28,7 @@ public class GenerateModel {
 	  	Instances trainData = loader.getDataSet();
 	  	
 	  	// set the class index. In this case the first colum indicates the class
-	  	trainData.setClassIndex(FFT_N_READS * 2);
+	  	trainData.setClassIndex(FFT_N_READS * 2 + 2);
 	  	
 	  	// create a new Random Forest Classifier
 	  	Classifier cls = new RandomForest();
