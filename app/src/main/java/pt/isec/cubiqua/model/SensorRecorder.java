@@ -141,8 +141,8 @@ public class SensorRecorder {
         this.startLocationService();
         this.startLocationUpdates();
 
-        sensorManager.registerListener(accelerometerListener, sensorAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-        sensorManager.registerListener(gyroscopeListener, sensorGyroscope, SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(accelerometerListener, sensorAccelerometer, SensorManager.SENSOR_DELAY_FASTEST);
+        sensorManager.registerListener(gyroscopeListener, sensorGyroscope, SensorManager.SENSOR_DELAY_FASTEST);
         sensorManager.registerListener(magnetometerListener, sensorMagnetometer, SensorManager.SENSOR_DELAY_NORMAL);
 
     }

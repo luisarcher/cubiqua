@@ -126,7 +126,6 @@ public class WekaDataProcessor implements  IOnNewSensorDataListener{
         this.allTimeAccMax.add(accMaxAngularVel);
         this.allTimeGyroMax.add(gyroMaxAngularVel);
 
-
     }
 
     private double calcAngularVelocity(float x, float y, float z){

@@ -5,7 +5,6 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelSftp;
@@ -26,9 +25,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Vector;
 
-import pt.isec.cubiqua.recognition.WekaClassifier;
 import pt.isec.cubiqua.recognition.WekaDataProcessor;
-import pt.isec.cubiqua.recognition.model.TupleResultAccuracy;
 import pt.isec.cubiqua.ui.IController;
 import weka.core.Instances;
 import weka.core.converters.ArffSaver;
@@ -95,7 +92,7 @@ public class FileManagerV2 {
                 }
                 this.saveFileAsync(_out.toString());
 
-                WekaClassifier wekaClassifier = new WekaClassifier();
+                /*WekaClassifier wekaClassifier = new WekaClassifier();
                 TupleResultAccuracy result = wekaClassifier.bulkPredict(
                         wekaDataProcessor.getAllTimeAccFFTData(),
                         wekaDataProcessor.getAllTimeGyroFFTData(),
@@ -105,7 +102,7 @@ public class FileManagerV2 {
 
                 Toast.makeText(this.context, ("" + result.getResult() + " " + result.getAccuracy()), Toast.LENGTH_LONG).show();
 
-                wekaDataProcessor.clearAllData();
+                wekaDataProcessor.clearAllData();*/
             }
         }
     }
