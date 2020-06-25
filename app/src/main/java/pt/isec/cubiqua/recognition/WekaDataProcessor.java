@@ -101,17 +101,27 @@ public class WekaDataProcessor implements  IOnNewSensorDataListener{
         // Calc FFT
         double[] re_acc = new double[FFT_N_READS];
         double[] im_acc = new double[FFT_N_READS];
+        double[] mag_acc = new double[FFT_N_READS];
         for (int i = 0; i < re_acc.length; i++)
             re_acc[i] = accAngularVelocityData.get(i);
         fftObj.fft(re_acc,im_acc);
-        this.allTimeAccFFTData.add(Arrays.copyOf(re_acc, re_acc.length));
+        for (int i = 0; i < re_acc.length; i++) {
+            mag_acc[i] = Math.sqrt(re_acc[i] * re_acc[i] + im_acc[i] * im_acc[i]);
+            im_acc[i] = .0;
+        }
+        this.allTimeAccFFTData.add(Arrays.copyOf(mag_acc, mag_acc.length));
 
         double[] re_gyro = new double[FFT_N_READS];
         double[] im_gyro = new double[FFT_N_READS];
+        double[] mag_gyro = new double[FFT_N_READS];
         for (int i = 0; i < re_gyro.length; i++)
             re_gyro[i] = gyroAngularVelocityData.get(i);
         fftObj.fft(re_gyro, im_gyro);
-        this.allTimeGyroFFTData.add(Arrays.copyOf(re_gyro, re_gyro.length));
+        for (int i = 0; i < re_gyro.length; i++) {
+            mag_gyro[i] = Math.sqrt(re_gyro[i] * re_gyro[i] + im_gyro[i] * im_gyro[i]);
+            im_gyro[i] = .0;
+        }
+        this.allTimeGyroFFTData.add(Arrays.copyOf(mag_gyro, mag_gyro.length));
 
         this.allTimeAccMax.add(accMaxAngularVel);
         this.allTimeGyroMax.add(gyroMaxAngularVel);
