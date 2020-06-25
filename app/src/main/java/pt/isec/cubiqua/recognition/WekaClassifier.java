@@ -5,8 +5,8 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.List;
 
-import pt.isec.cubiqua.recognition.model.GenerateModel;
 import pt.isec.cubiqua.recognition.model.TupleResultAccuracy;
+import pt.isec.cubiqua.recognition.model.WekaWrapperJ48C;
 import weka.classifiers.Classifier;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
@@ -24,13 +24,16 @@ import static pt.isec.cubiqua.Consts.WEKA_MODEL_FILENAME;
 
 public class WekaClassifier {
 
-    public WekaClassifier() {}
 
-    public void bulkPredict(List<double[]> accAllTimeData, List<double[]> gyroAllTimeData,
+    public WekaClassifier() {
+
+    }
+
+    public TupleResultAccuracy bulkPredict(List<double[]> accAllTimeData, List<double[]> gyroAllTimeData,
                             List<Double> accMaxValues, List<Double> gyroMaxValues){
 
         /* Generate Model */
-        String trainingDataPath = "weka_model.csv";
+        /*String trainingDataPath = "weka_model.csv";
         try {
             Log.d(WekaClassifier.class.getName(), "Generating Model...");
             GenerateModel.trainClassifier(WEKA_DIR + trainingDataPath, WEKA_DIR + WEKA_MODEL_FILENAME);
@@ -38,7 +41,7 @@ public class WekaClassifier {
             Log.e(WekaClassifier.class.getName(), "Catch: Error while training Model");
             e.printStackTrace();
         }
-        Log.d(WekaClassifier.class.getName(), "Model OK");
+        Log.d(WekaClassifier.class.getName(), "Model OK");*/
         /* Generate Model Ends */
 
         Log.d(WekaClassifier.class.getName(), "Predicting activity...");
@@ -54,12 +57,16 @@ public class WekaClassifier {
             }
         }
         Log.d(WekaClassifier.class.getName(), "Predicted Activity: " + mostAccurate.getResult() + " ACC: " + mostAccurate.getAccuracy());
+        return mostAccurate;
 
     }
 
     public TupleResultAccuracy predictActivity(double[] accData, double[] gyroData,
                                                Double accMax, Double gyroMax){
-        Classifier classifier = getClassifier();
+
+        WekaWrapperJ48C wekaJ48C = new WekaWrapperJ48C();
+
+        //Classifier classifier = getClassifier();
 
         Instances instances = getInstances(
                 (ArrayList<Attribute>) getAttributeList(), accData, gyroData, accMax, gyroMax
@@ -68,8 +75,12 @@ public class WekaClassifier {
         double result = 0;
         double[] percentages = new double[0];
         try {
-            result = classifier.classifyInstance(instances.firstInstance());
-            percentages = classifier.distributionForInstance(instances.firstInstance());
+
+            result = wekaJ48C.classifyInstance(instances.firstInstance());
+            percentages = wekaJ48C.distributionForInstance(instances.firstInstance());
+
+            //result = classifier.classifyInstance(instances.firstInstance());
+            //percentages = classifier.distributionForInstance(instances.firstInstance());
         } catch (Exception e) {
             e.printStackTrace();
             Log.e(WekaClassifier.class.getName(), "Catch: Error during classification!");

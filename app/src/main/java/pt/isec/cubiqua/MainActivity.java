@@ -102,7 +102,7 @@ public class MainActivity extends AppCompatActivity implements IController {
 
         this.sensorRecorder = new SensorRecorder(this);
         this.fileManager = new FileManager(this);
-        this.fileManagerV2 = new FileManagerV2(this);
+        this.fileManagerV2 = new FileManagerV2(this, this);
         this.databaseManager = new DatabaseManager(this);
 
         this.requestStoragePermission();
@@ -127,6 +127,10 @@ public class MainActivity extends AppCompatActivity implements IController {
 
     public void addMessage(String message) {
         this.messageList.add(message);
+
+        for (IOnNewMessageListener listener : this.messageListeners) {
+            listener.onNewMessage(message);
+        }
     }
 
     public void setupAutomaticMode() {
@@ -250,7 +254,7 @@ public class MainActivity extends AppCompatActivity implements IController {
         _out.append(this.sensorRecorder.getEntries().get(
                 this.sensorRecorder.getEntries().size()-1).toString()
         );
-        fileManager.saveFileAsync(_out.toString());
+        //fileManager.saveFileAsync(_out.toString());
         fileManagerV2.saveCurrentFeatures(this.sensorRecorder.getEntries());
         this.sensorRecorder.clearEntries();
 
@@ -293,7 +297,8 @@ public class MainActivity extends AppCompatActivity implements IController {
         this.isActivitySelected = isSelected;
     }
 
-    public int getCurrentEntryCount() {
+    @Override
+    public int countSensorEntries() {
         return this.sensorRecorder.getEntries().size();
     }
 

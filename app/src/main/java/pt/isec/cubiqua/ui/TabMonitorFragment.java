@@ -56,8 +56,8 @@ public class TabMonitorFragment extends Fragment implements IOnNewSensorDataList
 
         this.mainActivity = ((MainActivity)getActivity()).getInstance();
 
-        this.mainActivity.registerMonitor(this);
-        this.mainActivity.addMessageListener(this);
+        //this.mainActivity.registerMonitor(this);
+        //this.mainActivity.addMessageListener(this);
     }
 
     @Override
@@ -77,7 +77,7 @@ public class TabMonitorFragment extends Fragment implements IOnNewSensorDataList
         this.txtLocation.setText(((MainActivity)getActivity()).getLocAsStr());
         this.txtMagnetometer.setText(((MainActivity)getActivity()).getMagAsStr());
 
-        String nEntries = "" + ((MainActivity)getActivity()).getCurrentEntryCount();
+        String nEntries = "" +  mainActivity.countSensorEntries();
         this.txtNEntries.setText(nEntries);
         // Populate other elements accordingly
 

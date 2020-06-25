@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_gravity="center"
-        android:layout_marginTop="60sp">
+        android:layout_marginTop="30sp">
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -68,17 +68,41 @@
             android:orientation="vertical"
             android:padding="20dp">
 
-            <Button
-                android:id="@+id/btnStartStop"
+            <LinearLayout
+                android:id="@+id/llrow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Start" />
+                android:orientation="horizontal">
 
-            <Button
-                android:id="@+id/btnUpload"
+                <Button
+                    android:id="@+id/btnStartStop"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Start"
+                    android:layout_marginEnd="10sp"/>
+
+                <TextView
+                    android:id="@+id/txtNEntries"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/llrow2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Upload" />
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnUpload"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Upload"
+                    android:layout_marginEnd="10sp"/>
+            </LinearLayout>
+
 
             <CheckBox
                 android:id="@+id/chkAutomatic"
@@ -94,5 +118,13 @@
                 android:text="Convert to ARFF" />
 
         </LinearLayout>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/txtLog"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
     </LinearLayout>
 </LinearLayout>

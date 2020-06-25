@@ -123,9 +123,9 @@ public class WekaWrapperJ48C
      *
      * @param args the commandline arguments
      */
-    public static void main(String args[]) {
+    /*public static void main(String args[]) {
         runClassifier(new WekaWrapperJ48C(), args);
-    }
+    }*/
 }
 
 class WekaClassifier {

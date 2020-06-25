@@ -18,4 +18,9 @@ public interface IController {
     /* Methods from Tab Monitor */
     void registerMonitor(IOnNewSensorDataListener listener);
     void addMessageListener(IOnNewMessageListener listener);
+
+    /* Methods from FileManagerV2 */
+    void addMessage(String Message);
+
+    int countSensorEntries();
 }

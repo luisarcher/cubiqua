@@ -5,6 +5,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelSftp;
@@ -25,7 +26,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Vector;
 
+import pt.isec.cubiqua.recognition.WekaClassifier;
 import pt.isec.cubiqua.recognition.WekaDataProcessor;
+import pt.isec.cubiqua.recognition.model.TupleResultAccuracy;
+import pt.isec.cubiqua.ui.IController;
 import weka.core.Instances;
 import weka.core.converters.ArffSaver;
 import weka.core.converters.CSVLoader;
@@ -42,8 +46,10 @@ public class FileManagerV2 {
     private static String FILE_EXTENSION_ARFF = ".arff";
 
     SharedPreferencesManager sharedPreferencesManager;
+    private IController mainActivity;
 
-    public FileManagerV2(Context context){
+    public FileManagerV2(Context context, IController mainActivity){
+        this.mainActivity = mainActivity;
         this.context = context;
         this.sharedPreferencesManager = new SharedPreferencesManager(this.context);
     }
@@ -89,13 +95,15 @@ public class FileManagerV2 {
                 }
                 this.saveFileAsync(_out.toString());
 
-                /*WekaClassifier wekaClassifier = new WekaClassifier();
-                wekaClassifier.bulkPredict(
+                WekaClassifier wekaClassifier = new WekaClassifier();
+                TupleResultAccuracy result = wekaClassifier.bulkPredict(
                         wekaDataProcessor.getAllTimeAccFFTData(),
                         wekaDataProcessor.getAllTimeGyroFFTData(),
                         wekaDataProcessor.getAllTimeAccMax(),
                         wekaDataProcessor.getAllTimeGyroMax()
-                );*/
+                );
+
+                Toast.makeText(this.context, ("" + result.getResult() + " " + result.getAccuracy()), Toast.LENGTH_LONG).show();
 
                 wekaDataProcessor.clearAllData();
             }
