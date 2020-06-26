@@ -82,7 +82,7 @@
                     android:layout_marginEnd="10sp"/>
 
                 <TextView
-                    android:id="@+id/txtNEntries"
+                    android:id="@+id/txtNumEntries"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textStyle="bold"/>

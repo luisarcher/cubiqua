@@ -49,7 +49,12 @@ public class FileManager {
         return "session_id,latitude,longitude,altitude,instante,x_acc,y_acc,z_acc,x_gyro,y_gyro,z_gyro,x_mag,y_mag,z_mag,activity,indoor\n";
     }
 
-    public void saveFile(String data){
+    public void saveFile(String data, String filename){
+
+        if ("".equals(filename)) {
+            filename = FILENAME + FILE_EXTENSION_CSV;
+        }
+
         boolean mExternalStorageAvailable = false;
         boolean mExternalStorageWriteable = false;
         String state = Environment.getExternalStorageState();
@@ -67,7 +72,7 @@ public class FileManager {
             mExternalStorageAvailable = mExternalStorageWriteable = false;
         }
         if ( mExternalStorageAvailable && mExternalStorageWriteable ){
-            File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), FILENAME + FILE_EXTENSION_CSV);
+            File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), filename);
             boolean fileExists = file.exists();
 
             BufferedWriter bw;
@@ -254,7 +259,7 @@ public class FileManager {
 
         @Override
         protected String doInBackground(Void... params) {
-            this.classRef.saveFile(this.data);
+            this.classRef.saveFile(this.data,"");
             return "ok";
         }
 

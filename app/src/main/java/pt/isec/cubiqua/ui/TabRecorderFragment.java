@@ -2,6 +2,7 @@ package pt.isec.cubiqua.ui;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +10,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -16,6 +18,7 @@ import androidx.fragment.app.Fragment;
 
 import pt.isec.cubiqua.MainActivity;
 import pt.isec.cubiqua.R;
+import pt.isec.cubiqua.model.AppLog;
 
 
 /**
@@ -28,6 +31,9 @@ public class TabRecorderFragment extends Fragment {
 
     private String selectedActivity;
     private IController mainActivity;
+
+    private TextView txtMessageList;
+    private TextView txtNumSensorEntries;
 
 
     private boolean recordingStatusBtnState;
@@ -58,8 +64,9 @@ public class TabRecorderFragment extends Fragment {
         this.recordingStatusBtnState = false;
 
         radioGroup = (RadioGroup) getView().findViewById(R.id.radBtnGroup);
-
         startStopButton = (Button) getView().findViewById(R.id.btnStartStop);
+        txtMessageList = getView().findViewById(R.id.txtLog);
+        txtNumSensorEntries = getView().findViewById(R.id.txtNumEntries);
 
         // Restore button status according to main activity data
         if (!mainActivity.isActivitySelected()) {
@@ -110,6 +117,28 @@ public class TabRecorderFragment extends Fragment {
                 mainActivity.convertToARFF();
             }
         });
+
+        CheckBox chkBoxAutomaticMode = getView().findViewById(R.id.chkAutomatic);
+        chkBoxAutomaticMode.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                boolean checked = ((CheckBox) v).isChecked();
+                if (v.getId() == R.id.chkAutomatic) {
+                    if (checked) {
+                        mainActivity.setupAutomaticMode();
+                        Log.d("Automatic Mode: ", "Enabled");
+                    }
+                    else {
+                        mainActivity.unsetAutomaticMode();
+                        Log.d("Automatic Mode: ", "Disabled");
+                    }
+                }
+            }
+        });
+
+        setupConsoleLog();
+        setupEntryCounter();
     }
 
     private View.OnClickListener onRadioButtonClickedListener = new View.OnClickListener() {
@@ -148,16 +177,28 @@ public class TabRecorderFragment extends Fragment {
         }
     };
 
-    public void onCheckboxClicked(View view) {
-        // Is the view now checked?
-        boolean checked = ((CheckBox) view).isChecked();
+    private void setupConsoleLog() {
+        IOnNewMessageListener listener = new IOnNewMessageListener() {
 
-        // Check which checkbox was clicked
-        if (view.getId() == R.id.chkAutomatic) {
-            if (checked)
-                mainActivity.setupAutomaticMode();
-                //else
-            // Unset automatic mode by removing listener
-        }
+            @Override
+            public void onNewMessage(String message) {
+
+                StringBuilder _out = new StringBuilder();
+                for (String entry : AppLog.getInstance().getLastMessages()) {
+                    _out.append(entry).append("\n");
+                }
+                txtMessageList.setText(_out.toString());
+            }
+        };
+        AppLog.getInstance().addListener(listener);
+    }
+
+    private void setupEntryCounter() {
+        IOnNewSensorDataListener listener = new IOnNewSensorDataListener() {
+            @Override
+            public void onNewSensorData() {
+                txtNumSensorEntries.setText("" + mainActivity.countSensorEntries());
+            }
+        };
     }
 }

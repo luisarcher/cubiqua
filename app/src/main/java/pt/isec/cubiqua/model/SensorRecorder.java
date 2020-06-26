@@ -103,12 +103,14 @@ public class SensorRecorder {
 
     }
 
-    /*public void setListener(IOnNewSensorDataListener l) {
-        this.listener = l;
-    }*/
     public void addListener(IOnNewSensorDataListener listener){
         this.listeners.add(listener);
     }
+
+    public void removerListener(IOnNewSensorDataListener listener) {
+        this.listeners.remove(listener);
+    }
+
     private void notifyListeners() {
         for (IOnNewSensorDataListener listener : listeners){
             listener.onNewSensorData();
@@ -141,8 +143,8 @@ public class SensorRecorder {
         this.startLocationService();
         this.startLocationUpdates();
 
-        sensorManager.registerListener(accelerometerListener, sensorAccelerometer, SensorManager.SENSOR_DELAY_FASTEST);
-        sensorManager.registerListener(gyroscopeListener, sensorGyroscope, SensorManager.SENSOR_DELAY_FASTEST);
+        sensorManager.registerListener(accelerometerListener, sensorAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(gyroscopeListener, sensorGyroscope, SensorManager.SENSOR_DELAY_NORMAL);
         sensorManager.registerListener(magnetometerListener, sensorMagnetometer, SensorManager.SENSOR_DELAY_NORMAL);
 
     }

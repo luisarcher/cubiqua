@@ -43,10 +43,10 @@ public class FileManagerV2 {
     private static String FILE_EXTENSION_ARFF = ".arff";
 
     SharedPreferencesManager sharedPreferencesManager;
-    private IController mainActivity;
+    //private IController mainActivity;
 
     public FileManagerV2(Context context, IController mainActivity){
-        this.mainActivity = mainActivity;
+        //this.mainActivity = mainActivity;
         this.context = context;
         this.sharedPreferencesManager = new SharedPreferencesManager(this.context);
     }
@@ -91,18 +91,6 @@ public class FileManagerV2 {
                     if (i < len-1) _out.append("\n");
                 }
                 this.saveFileAsync(_out.toString());
-
-                /*WekaClassifier wekaClassifier = new WekaClassifier();
-                TupleResultAccuracy result = wekaClassifier.bulkPredict(
-                        wekaDataProcessor.getAllTimeAccFFTData(),
-                        wekaDataProcessor.getAllTimeGyroFFTData(),
-                        wekaDataProcessor.getAllTimeAccMax(),
-                        wekaDataProcessor.getAllTimeGyroMax()
-                );
-
-                Toast.makeText(this.context, ("" + result.getResult() + " " + result.getAccuracy()), Toast.LENGTH_LONG).show();
-
-                wekaDataProcessor.clearAllData();*/
             }
         }
     }

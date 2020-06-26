@@ -1,16 +1,21 @@
 package pt.isec.cubiqua.recognition;
 
+import android.os.AsyncTask;
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import pt.isec.cubiqua.model.AppLog;
 import pt.isec.cubiqua.model.SensorRecorder;
 import pt.isec.cubiqua.model.SensorStamp;
+import pt.isec.cubiqua.recognition.model.TupleResultAccuracy;
 import pt.isec.cubiqua.ui.IOnNewSensorDataListener;
 
 import static pt.isec.cubiqua.Consts.FFT_N_READS;
 
-public class WekaDataProcessor implements  IOnNewSensorDataListener{
+public class WekaDataProcessor implements  IOnNewSensorDataListener {
 
     //TODO: Since this is done after every sensor read, this must be an async task.
     //The sensor reads should be freed
@@ -26,8 +31,9 @@ public class WekaDataProcessor implements  IOnNewSensorDataListener{
     private SensorRecorder sensorRecorderPtr;
 
     // Used for future async task
-    boolean resourceLocked = false;
     private FFT fftObj;
+    private WekaClassifier wekaClassifier;
+    private boolean resourceLocked;
 
     public WekaDataProcessor(){
 
@@ -37,6 +43,9 @@ public class WekaDataProcessor implements  IOnNewSensorDataListener{
         this.allTimeGyroMax = new ArrayList<>();
 
         fftObj = new FFT(FFT_N_READS);
+        wekaClassifier = new WekaClassifier();
+        resourceLocked = false;
+
     }
 
     public void setSensorRecorder(SensorRecorder ref) {
@@ -55,11 +64,18 @@ public class WekaDataProcessor implements  IOnNewSensorDataListener{
                 this.sensorRecorderPtr.getEntries().subList(lenEntries-FFT_N_READS, FFT_N_READS)
         );
 
-        execDataAnalysis(bufferData);
+        execDataAnalysisAsync(bufferData);
+    }
+    public void execDataAnalysisAsync(List<SensorStamp> bufferData){
+        if (resourceLocked) {
+            Log.d(WekaDataProcessor.class.getName(), "Trying to access analysis resources while they were locked!");
+            return;
+        }
+        resourceLocked = true;
+        new LongOperationPredict(this, bufferData).execute();
     }
 
     public void execDataAnalysis(List<SensorStamp> bufferData){
-
         // Calc angular velocity
         List<Double> accAngularVelocityData = new ArrayList<>();
         List<Double> gyroAngularVelocityData = new ArrayList<>();
@@ -67,18 +83,18 @@ public class WekaDataProcessor implements  IOnNewSensorDataListener{
         Double accMaxAngularVel = null;
         Double gyroMaxAngularVel = null;
 
-        String currentHumanActivity = "";
+        //String currentHumanActivity = "";
 
         for (SensorStamp stamp : bufferData) {
 
-            if ("".equals(currentHumanActivity)){
+            /*if ("".equals(currentHumanActivity)){
                 currentHumanActivity = stamp.getTag();
             }
 
             if (!stamp.getTag().equals(currentHumanActivity)) {
                 // If the next stamp
                 return;
-            }
+            }*/
 
             double currAccAngularVel = calcAngularVelocity(
                     stamp.getX_acc(), stamp.getY_acc(), stamp.getZ_acc()
@@ -126,6 +142,9 @@ public class WekaDataProcessor implements  IOnNewSensorDataListener{
         this.allTimeAccMax.add(accMaxAngularVel);
         this.allTimeGyroMax.add(gyroMaxAngularVel);
 
+        TupleResultAccuracy result = this.wekaClassifier.predictActivity(mag_acc, mag_gyro, accMaxAngularVel, gyroMaxAngularVel);
+        AppLog.getInstance().log("Act: " + result.getResult() + " acc: " + result.getAccuracy());
+        resourceLocked = false;
     }
 
     private double calcAngularVelocity(float x, float y, float z){
@@ -153,6 +172,31 @@ public class WekaDataProcessor implements  IOnNewSensorDataListener{
         allTimeGyroFFTData.clear();
         allTimeAccMax.clear();
         allTimeGyroMax.clear();
+    }
+
+    private static class LongOperationPredict extends AsyncTask<Void, Integer, String> {
+
+        private WekaDataProcessor classRef;
+        private List<SensorStamp> data;
+
+        LongOperationPredict(WekaDataProcessor ref, List<SensorStamp> data) {
+            this.classRef = ref;
+            this.data = data;
+        }
+
+        @Override
+        protected void onPreExecute() {}
+
+        @Override
+        protected String doInBackground(Void... params) {
+            this.classRef.execDataAnalysis(this.data);
+            return "doInBackgroundFinished";
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            Log.d("Prediction finished", result);
+        }
     }
 
 }

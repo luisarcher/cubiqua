@@ -24,8 +24,11 @@ import static pt.isec.cubiqua.Consts.WEKA_MODEL_FILENAME;
 
 public class WekaClassifier {
 
+    List<double[]> percentages;
 
     public WekaClassifier() {
+
+        percentages = new ArrayList<>();
 
     }
 
@@ -150,8 +153,8 @@ public class WekaClassifier {
     private List<String> getActivities() {
         List<String> activities = new ArrayList<>();
         activities.add(WALK); activities.add(JUMP);
-        activities.add(SQUAT); activities.add(LAY);
-        activities.add(SITTING);
+        activities.add(SQUAT); activities.add(SITTING);
+        activities.add(LAY);
         return activities;
     }
 
