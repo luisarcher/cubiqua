@@ -28,6 +28,8 @@ public class WekaDataProcessor implements  IOnNewSensorDataListener {
     private List<Double> allTimeAccMax;
     private List<Double> allTimeGyroMax;
 
+    private TupleResultAccuracy lastPredResult;
+
     private SensorRecorder sensorRecorderPtr;
 
     // Used for future async task
@@ -57,21 +59,15 @@ public class WekaDataProcessor implements  IOnNewSensorDataListener {
 
         int lenEntries = this.sensorRecorderPtr.getEntries().size();
 
-        if (lenEntries < FFT_N_READS)
+        if (lenEntries < FFT_N_READS || resourceLocked)
             return;
 
         List<SensorStamp> bufferData = new ArrayList<>(
-                this.sensorRecorderPtr.getEntries().subList(lenEntries-FFT_N_READS, FFT_N_READS)
+                this.sensorRecorderPtr.getEntries().subList(lenEntries-FFT_N_READS, lenEntries)
         );
-
         execDataAnalysisAsync(bufferData);
     }
     public void execDataAnalysisAsync(List<SensorStamp> bufferData){
-        if (resourceLocked) {
-            Log.d(WekaDataProcessor.class.getName(), "Trying to access analysis resources while they were locked!");
-            return;
-        }
-        resourceLocked = true;
         new LongOperationPredict(this, bufferData).execute();
     }
 
@@ -143,8 +139,8 @@ public class WekaDataProcessor implements  IOnNewSensorDataListener {
         this.allTimeGyroMax.add(gyroMaxAngularVel);
 
         TupleResultAccuracy result = this.wekaClassifier.predictActivity(mag_acc, mag_gyro, accMaxAngularVel, gyroMaxAngularVel);
-        AppLog.getInstance().log("Act: " + result.getResult() + " acc: " + result.getAccuracy());
-        resourceLocked = false;
+        if (this.lastPredResult == null || lastPredResult.getResult() != result.getResult())
+            AppLog.getInstance().log("Act: " + result.getResult() + " acc: " + result.getAccuracy());
     }
 
     private double calcAngularVelocity(float x, float y, float z){
@@ -185,7 +181,9 @@ public class WekaDataProcessor implements  IOnNewSensorDataListener {
         }
 
         @Override
-        protected void onPreExecute() {}
+        protected void onPreExecute() {
+            classRef.setResourceLocked(true);
+        }
 
         @Override
         protected String doInBackground(Void... params) {
@@ -195,8 +193,16 @@ public class WekaDataProcessor implements  IOnNewSensorDataListener {
 
         @Override
         protected void onPostExecute(String result) {
+            classRef.setResourceLocked(false);
             Log.d("Prediction finished", result);
         }
     }
 
+    public void setResourceLocked(boolean resourceLocked) {
+        this.resourceLocked = resourceLocked;
+    }
+
+    public boolean isResourceLocked() {
+        return resourceLocked;
+    }
 }

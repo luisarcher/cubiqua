@@ -1,5 +1,7 @@
 package pt.isec.cubiqua.model;
 
+import android.icu.util.Calendar;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,7 +32,7 @@ public class AppLog {
     }
 
     public void log(String message) {
-        this.logMessages.add(message);
+        this.logMessages.add(getTimeStamp() + ": " + message);
         this.notifyListeners();
     }
 
@@ -46,9 +48,10 @@ public class AppLog {
     }*/
 
     public List<String> getLastMessages() {
-        int _len = Math.min(logMessages.size()-1, MESSAGE_WINDOW);
+
+        int _lim = (logMessages.size() > MESSAGE_WINDOW ? logMessages.size() - MESSAGE_WINDOW : 0);
         List<String> ret = new ArrayList<>();
-        for (int i = _len ; i > 0; i--) {
+        for (int i = logMessages.size()-1 ; i >= _lim; i--) {
             ret.add(logMessages.get(i));
         }
         return ret;
@@ -66,5 +69,15 @@ public class AppLog {
         for (IOnNewMessageListener listener : this.listeners) {
             listener.onNewMessage(logMessages.get(logMessages.size() - 1));
         }
+    }
+
+    private String getTimeStamp(){
+        int _hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+        String hour = (_hour < 10 ? "0" + _hour : "" + _hour);
+        int _min = Calendar.getInstance().get(Calendar.MINUTE);
+        String min = (_min < 10 ? "0" + _min : "" + _min);
+        int _sec = Calendar.getInstance().get(Calendar.SECOND);
+        String sec = (_sec < 10 ? "0" + _sec : "" + _sec);
+        return "" + hour + min + sec;
     }
 }

@@ -187,6 +187,10 @@ public class MainActivity extends AppCompatActivity implements IController {
         this.isRecording = false;
 
         this.saveCurrentData();
+
+        // If automatic mode is selected, basically
+        if (this.wekaDataProcessor != null)
+            this.wekaDataProcessor.clearAllData();
     }
 
     private void getSensorList(){
@@ -245,17 +249,19 @@ public class MainActivity extends AppCompatActivity implements IController {
     }
 
     private void saveCurrentData(){
-        StringBuilder _out = new StringBuilder();
-        /*for (SensorStamp stamp : this.sensorRecorder.getEntries()) {
-            _out.append(stamp.toString()).append("\n");
-        }*/
-        for (int i = 0; i < this.sensorRecorder.getEntries().size()-1 ; i++){
-            _out.append(this.sensorRecorder.getEntries().get(i).toString()).append("\n");
-        }
-        _out.append(this.sensorRecorder.getEntries().get(
-                this.sensorRecorder.getEntries().size()-1).toString()
-        );
+
         if (!isAutomaticMode) {
+            StringBuilder _out = new StringBuilder();
+            /*for (SensorStamp stamp : this.sensorRecorder.getEntries()) {
+                _out.append(stamp.toString()).append("\n");
+            }*/
+            for (int i = 0; i < this.sensorRecorder.getEntries().size()-1 ; i++){
+                _out.append(this.sensorRecorder.getEntries().get(i).toString()).append("\n");
+            }
+            _out.append(this.sensorRecorder.getEntries().get(
+                    this.sensorRecorder.getEntries().size()-1).toString()
+            );
+
             //fileManager.saveFileAsync(_out.toString());
             fileManagerV2.saveCurrentFeatures(this.sensorRecorder.getEntries());
         }

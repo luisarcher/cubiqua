@@ -19,4 +19,5 @@ public interface IController {
     void convertToARFF();
 
     int countSensorEntries();
+    void registerMonitor(IOnNewSensorDataListener listener);
 }

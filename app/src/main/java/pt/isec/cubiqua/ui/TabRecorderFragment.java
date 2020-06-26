@@ -127,10 +127,15 @@ public class TabRecorderFragment extends Fragment {
                 if (v.getId() == R.id.chkAutomatic) {
                     if (checked) {
                         mainActivity.setupAutomaticMode();
+                        selectedActivity = "NONE";
+                        startStopButton.setEnabled(true);
+                        radioGroup.setAlpha(0);
                         Log.d("Automatic Mode: ", "Enabled");
                     }
                     else {
                         mainActivity.unsetAutomaticMode();
+                        radioGroup.setAlpha(1);
+                        startStopButton.setEnabled(false);
                         Log.d("Automatic Mode: ", "Disabled");
                     }
                 }
@@ -183,11 +188,16 @@ public class TabRecorderFragment extends Fragment {
             @Override
             public void onNewMessage(String message) {
 
-                StringBuilder _out = new StringBuilder();
+                final StringBuilder _out = new StringBuilder();
                 for (String entry : AppLog.getInstance().getLastMessages()) {
                     _out.append(entry).append("\n");
                 }
-                txtMessageList.setText(_out.toString());
+                ((MainActivity)getActivity()).getInstance().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        txtMessageList.setText(_out.toString());
+                    }
+                });
             }
         };
         AppLog.getInstance().addListener(listener);
@@ -197,8 +207,14 @@ public class TabRecorderFragment extends Fragment {
         IOnNewSensorDataListener listener = new IOnNewSensorDataListener() {
             @Override
             public void onNewSensorData() {
-                txtNumSensorEntries.setText("" + mainActivity.countSensorEntries());
+                ((MainActivity)getActivity()).getInstance().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        txtNumSensorEntries.setText("" + mainActivity.countSensorEntries());
+                    }
+                });
             }
         };
+        mainActivity.registerMonitor(listener);
     }
 }
