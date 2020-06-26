@@ -10,14 +10,6 @@ import static pt.isec.cubiqua.Consts.FFT_N_READS;
 
 public class GenerateModel {
 
-	/*public static void main(String[] args) throws Exception {
-
-                String trainPath = "your/path/to/training/";
-		String trainingDataPath = "your/path/to/training/data.csv";
-		trainClassifier(trainingDataPath, trainPath + ".model");
-		
-	}*/
-
   	public static void trainClassifier(String trainSetPath, String classifierSavePath) throws Exception {
   	
 	  	// load the csv file

@@ -12,6 +12,7 @@ import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.converters.ConverterUtils;
 
 import static pt.isec.cubiqua.Consts.FFT_N_READS;
 import static pt.isec.cubiqua.Consts.JUMP;
@@ -24,7 +25,7 @@ import static pt.isec.cubiqua.Consts.WEKA_MODEL_FILENAME;
 
 public class WekaClassifier {
 
-    List<double[]> percentages;
+    private List<double[]> percentages;
 
     public WekaClassifier() {
 
@@ -81,6 +82,7 @@ public class WekaClassifier {
 
             result = wekaJ48C.classifyInstance(instances.firstInstance());
             percentages = wekaJ48C.distributionForInstance(instances.firstInstance());
+            this.percentages.add(percentages);
 
             //result = classifier.classifyInstance(instances.firstInstance());
             //percentages = classifier.distributionForInstance(instances.firstInstance());
@@ -150,6 +152,22 @@ public class WekaClassifier {
         return c;
     }
 
+    private static void classifyCsv(Classifier cls, String testSetPath) throws Exception {
+
+        // load testData
+        ConverterUtils.DataSource source = new ConverterUtils.DataSource(testSetPath);
+        Instances testData = source.getDataSet();
+        testData.setClassIndex(FFT_N_READS * 2 + 2);
+
+        // iterate through the data
+        for (int i = 0; i < testData.numInstances(); i++) {
+            // classify instance wise
+            double pred = cls.classifyInstance(testData.instance(i));
+
+            System.out.print("Prediction was: " + pred);
+        }
+    }
+
     private List<String> getActivities() {
         List<String> activities = new ArrayList<>();
         activities.add(WALK); activities.add(JUMP);
@@ -158,6 +176,11 @@ public class WekaClassifier {
         return activities;
     }
 
+    public List<double[]> getPercentages() {
+        return percentages;
+    }
 
-
+    public void clearPercentages() {
+        this.percentages.clear();
+    }
 }

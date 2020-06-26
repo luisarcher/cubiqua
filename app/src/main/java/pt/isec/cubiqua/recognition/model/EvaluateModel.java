@@ -8,14 +8,7 @@ import weka.core.converters.ConverterUtils.DataSource;
 import static pt.isec.cubiqua.Consts.FFT_N_READS;
 
 public class EvaluateModel {
-	
-	/*public static void main(String[] args) throws Exception {
-	
-		Classifier cls = (Classifier) weka.core.SerializationHelper.read("your/path/to/training/data.csv.model");
-		testClassifier("your/path/to/training/data.csv", "your/path/to/test/data.csv", cls);
-		
-	}*/
-	
+
 	public static void testClassifier(String trainSetPath, String testSetPath, Classifier cls) throws Exception {
 	  
 		// load training Data Set (Needed for the Evaluator)

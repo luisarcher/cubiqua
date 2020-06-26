@@ -17,12 +17,6 @@ import static pt.isec.cubiqua.Consts.FFT_N_READS;
 
 public class WekaDataProcessor implements  IOnNewSensorDataListener {
 
-    //TODO: Since this is done after every sensor read, this must be an async task.
-    //The sensor reads should be freed
-
-    //private double[] accFFTData;
-    //private double[] gyroFFTData;
-
     private List<double[]> allTimeAccFFTData;
     private List<double[]> allTimeGyroFFTData;
     private List<Double> allTimeAccMax;
@@ -139,9 +133,10 @@ public class WekaDataProcessor implements  IOnNewSensorDataListener {
         this.allTimeGyroMax.add(gyroMaxAngularVel);
 
         TupleResultAccuracy result = this.wekaClassifier.predictActivity(mag_acc, mag_gyro, accMaxAngularVel, gyroMaxAngularVel);
-        if (this.lastPredResult == null || !(result.getResult().equals(lastPredResult.getResult())))
-            this.lastPredResult = result;
+        /*if (this.lastPredResult == null || !(result.getResult().equals(lastPredResult.getResult()))){
+            this.lastPredResult = new TupleResultAccuracy(result);*/
             AppLog.getInstance().log("Act: " + result.getResult() + " acc: " + result.getAccuracy());
+        //}
     }
 
     private double calcAngularVelocity(float x, float y, float z){
@@ -169,6 +164,7 @@ public class WekaDataProcessor implements  IOnNewSensorDataListener {
         allTimeGyroFFTData.clear();
         allTimeAccMax.clear();
         allTimeGyroMax.clear();
+        this.wekaClassifier.clearPercentages();
     }
 
     private static class LongOperationPredict extends AsyncTask<Void, Integer, String> {
@@ -205,5 +201,9 @@ public class WekaDataProcessor implements  IOnNewSensorDataListener {
 
     public boolean isResourceLocked() {
         return resourceLocked;
+    }
+
+    public List<double[]> getAllInstanceDistributions() {
+        return this.wekaClassifier.getPercentages();
     }
 }

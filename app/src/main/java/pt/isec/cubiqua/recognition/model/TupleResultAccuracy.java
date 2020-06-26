@@ -10,6 +10,11 @@ public class TupleResultAccuracy {
         this.accuracy = 0.0;
     }
 
+    public TupleResultAccuracy(TupleResultAccuracy otherTuple) {
+        this.result = otherTuple.getResult();
+        this.accuracy = otherTuple.getAccuracy();
+    }
+
     public String getResult() {
         return result;
     }

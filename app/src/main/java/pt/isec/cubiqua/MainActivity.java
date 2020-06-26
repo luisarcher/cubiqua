@@ -189,8 +189,21 @@ public class MainActivity extends AppCompatActivity implements IController {
         this.saveCurrentData();
 
         // If automatic mode is selected, basically
-        if (this.wekaDataProcessor != null)
+        if (this.wekaDataProcessor != null){
+            FileManager fileManagerPerc = new FileManager(this);
+
+            // Saver distribution for further analysis
+            StringBuilder _out = new StringBuilder();
+            for (double[] dist : this.wekaDataProcessor.getAllInstanceDistributions()){
+                for (int i = 0; i < dist.length-1; i++){
+                    _out.append(dist[i]).append(",");
+                }
+                _out.append(dist[dist.length-1]).append("\n");
+            }
+
+            fileManagerPerc.saveFile(_out.toString(), "last_perc_dist.csv");
             this.wekaDataProcessor.clearAllData();
+        }
     }
 
     private void getSensorList(){
