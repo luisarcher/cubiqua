@@ -139,7 +139,8 @@ public class WekaDataProcessor implements  IOnNewSensorDataListener {
         this.allTimeGyroMax.add(gyroMaxAngularVel);
 
         TupleResultAccuracy result = this.wekaClassifier.predictActivity(mag_acc, mag_gyro, accMaxAngularVel, gyroMaxAngularVel);
-        if (this.lastPredResult == null || lastPredResult.getResult() != result.getResult())
+        if (this.lastPredResult == null || !(result.getResult().equals(lastPredResult.getResult())))
+            this.lastPredResult = result;
             AppLog.getInstance().log("Act: " + result.getResult() + " acc: " + result.getAccuracy());
     }
 
